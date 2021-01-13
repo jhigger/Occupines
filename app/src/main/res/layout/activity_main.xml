@@ -57,7 +57,7 @@
         android:paddingEnd="30dp"
         android:singleLine="true"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/login"
+        app:layout_constraintBottom_toTopOf="@+id/signin"
         app:layout_constraintEnd_toEndOf="@+id/email"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/email"
@@ -65,7 +65,7 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <Button
-        android:id="@+id/login"
+        android:id="@+id/signin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="75dp"
@@ -73,31 +73,33 @@
         android:layout_marginBottom="10dp"
         android:background="@drawable/button_style"
         android:elegantTextHeight="true"
-        android:text="@string/login"
+        android:text="@string/sign_in"
         android:textAlignment="center"
+        android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textSize="30sp"
+        android:textSize="24sp"
         app:cornerRadius="50dp"
-        app:layout_constraintBottom_toTopOf="@+id/createAccount"
+        app:layout_constraintBottom_toTopOf="@+id/signup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/createAccount"
+        android:id="@+id/signup"
         android:layout_width="0dp"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="25dp"
-        android:background="@drawable/edit_text_style"
+        android:background="@drawable/button_style"
         android:elegantTextHeight="true"
-        android:text="@string/create_account"
+        android:text="@string/sign_up"
         android:textAlignment="center"
-        android:textColor="@color/cardview_dark_background"
-        android:textSize="14sp"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="24sp"
         app:cornerRadius="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/login"
+        app:layout_constraintEnd_toEndOf="@+id/signin"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/login" />
+        app:layout_constraintStart_toStartOf="@+id/signin" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
