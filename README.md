@@ -1,7 +1,7 @@
 # Occupines
 Android Project
 
-![Occupines Logo](https://github.com/jhigger/Occupines/blob/master/app/src/main/res/mipmap-xhdpi/occupines_logo_foreground.png?raw=true)
+[![Occupines Logo](https://github.com/jhigger/Occupines/blob/master/app/src/main/res/mipmap-xhdpi/occupines_logo_foreground.png?raw=true)](https://github.com/jhigger/Occupines)
 
 ---
 
