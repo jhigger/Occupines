@@ -37,7 +37,6 @@
             android:layout_margin="10dp"
             android:autofillHints=""
             android:background="@drawable/edit_text_style"
-            android:elegantTextHeight="false"
             android:ems="10"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
@@ -59,7 +58,6 @@
             android:layout_margin="10dp"
             android:autofillHints=""
             android:background="@drawable/edit_text_style"
-            android:elegantTextHeight="false"
             android:ems="10"
             android:hint="@string/password"
             android:inputType="textPassword"
@@ -86,7 +84,7 @@
         app:layout_constraintTop_toBottomOf="@+id/editTexts">
 
         <Button
-            android:id="@+id/signup"
+            android:id="@+id/signUp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -101,10 +99,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/signin" />
+            app:layout_constraintTop_toBottomOf="@+id/signIn" />
 
         <Button
-            android:id="@+id/signin"
+            android:id="@+id/signIn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -115,7 +113,7 @@
             android:textColor="@color/white"
             android:textSize="24sp"
             app:cornerRadius="50dp"
-            app:layout_constraintBottom_toTopOf="@+id/signup"
+            app:layout_constraintBottom_toTopOf="@+id/signUp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
