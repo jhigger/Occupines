@@ -6,4 +6,14 @@
     <string name="password">Password</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
+    <string name="home">Home</string>
+    <string name="likes">Likes</string>
+    <string name="rentals">Rentals</string>
+    <string name="calendar">Calendar</string>
+    <string name="notifications">Notifications</string>
+    <string name="_5th_fragment">5th fragment</string>
+    <string name="_1st_fragment">1st fragment</string>
+    <string name="_4th_fragment">4th fragment</string>
+    <string name="_2nd_fragment">2nd fragment</string>
+    <string name="_3rd_fragment">3rd fragment</string>s
 </resources>
