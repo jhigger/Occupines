@@ -1,20 +1,25 @@
 package com.example.occupines;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
+    private FirebaseAuth mAuth;
     @SuppressLint("NonConstantResourceId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mAuth = FirebaseAuth.getInstance();
 
         FirstFragment firstFragment = new FirstFragment();
         SecondFragment secondFragment = new SecondFragment();
@@ -51,5 +56,12 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().
                 replace(R.id.flFragment, fragment).
                 commit();
+    }
+
+    private void signOut() {
+        mAuth.signOut();
+        startActivity(new Intent(MainActivity.this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        finish();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

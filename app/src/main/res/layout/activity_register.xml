@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Register">
+    tools:context=".RegisterActivity">
 
     <ImageView
         android:id="@+id/icon2"
@@ -45,6 +45,7 @@
             android:paddingStart="30dp"
             android:paddingEnd="30dp"
             android:selectAllOnFocus="false"
+            android:singleLine="true"
             app:layout_constraintBottom_toTopOf="@+id/email"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -64,6 +65,7 @@
             android:paddingStart="30dp"
             android:paddingEnd="30dp"
             android:selectAllOnFocus="false"
+            android:singleLine="true"
             android:textSize="18sp"
             app:layout_constraintBottom_toTopOf="@+id/password"
             app:layout_constraintEnd_toEndOf="parent"
