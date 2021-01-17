@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,8 +12,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
+
     private static final String TAG = "Login: ";
     private FirebaseAuth mAuth;
+    private Utility utils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +23,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+        utils = new Utility();
 
         buttonEvents();
     }
@@ -35,26 +37,31 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void buttonEvents() {
-        EditText email = (EditText) findViewById(R.id.email);
-        EditText password = (EditText) findViewById(R.id.password);
-
-        Button signIn = (Button) findViewById(R.id.signIn);
-        Button signUp = (Button) findViewById(R.id.signUp);
+        Button signIn = findViewById(R.id.signIn);
+        Button signUp = findViewById(R.id.signUp);
 
         signIn.setOnClickListener(v -> {
-            if (checkInputs(email.getText().toString(), password.getText().toString())) {
-                signIn(email.getText().toString(), password.getText().toString());
+            utils.toggleButton(signIn);
+            utils.toggleButton(signUp);
+
+            String email = ((EditText) findViewById(R.id.email)).getText().toString();
+            String password = ((EditText) findViewById(R.id.password)).getText().toString();
+
+            if (utils.checkInputs(email, password)) {
+                signIn(email, password);
             } else {
-                Toast.makeText(LoginActivity.this, "Some fields are empty.",
-                        Toast.LENGTH_SHORT).show();
+                utils.showToast(LoginActivity.this, "Some fields are empty.");
             }
+
+            utils.toggleButton(signIn);
+            utils.toggleButton(signUp);
         });
 
-        signUp.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, RegisterActivity.class)));
-    }
-
-    private boolean checkInputs(String email, String password) {
-        return !email.isEmpty() && !password.isEmpty();
+        signUp.setOnClickListener(v -> {
+            utils.toggleButton(signUp);
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            utils.toggleButton(signUp);
+        });
     }
 
     private void updateUI(FirebaseUser user) {
@@ -70,20 +77,15 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithEmail:success");
-                        Toast.makeText(LoginActivity.this, "Login success.",
-                                Toast.LENGTH_SHORT).show();
+                        utils.showToast(LoginActivity.this, "Login success.");
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUI(user);
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.getException());
-                        Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                Toast.LENGTH_SHORT).show();
+                        utils.showToast(LoginActivity.this, "Authentication failed.");
                         updateUI(null);
-                        // ...
                     }
-
-                    // ...
                 });
     }
 }

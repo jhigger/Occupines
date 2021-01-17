@@ -85,6 +85,24 @@
         app:layout_constraintTop_toBottomOf="@+id/editTexts">
 
         <Button
+            android:id="@+id/signIn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/button_style"
+            android:elegantTextHeight="true"
+            android:text="@string/sign_in"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            app:cornerRadius="50dp"
+            app:layout_constraintBottom_toTopOf="@+id/signUp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
             android:id="@+id/signUp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -102,23 +120,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/signIn" />
 
-        <Button
-            android:id="@+id/signIn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:background="@drawable/button_style"
-            android:elegantTextHeight="true"
-            android:text="@string/sign_in"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            app:cornerRadius="50dp"
-            app:layout_constraintBottom_toTopOf="@+id/signUp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
