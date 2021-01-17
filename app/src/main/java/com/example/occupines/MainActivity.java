@@ -1,8 +1,8 @@
 package com.example.occupines;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    @SuppressLint("NonConstantResourceId")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,22 +31,22 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         bottomNav.setOnNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.home:
-                    setCurrentFragment(firstFragment);
-                    return true;
-                case R.id.likes:
-                    setCurrentFragment(secondFragment);
-                    return true;
-                case R.id.rentals:
-                    setCurrentFragment(thirdFragment);
-                    return true;
-                case R.id.calendar:
-                    setCurrentFragment(fourthFragment);
-                    return true;
-                case R.id.notifications:
-                    setCurrentFragment(fifthFragment);
-                    return true;
+            int itemId = item.getItemId();
+            if (itemId == R.id.home) {
+                setCurrentFragment(firstFragment);
+                return true;
+            } else if (itemId == R.id.likes) {
+                setCurrentFragment(secondFragment);
+                return true;
+            } else if (itemId == R.id.rentals) {
+                setCurrentFragment(thirdFragment);
+                return true;
+            } else if (itemId == R.id.calendar) {
+                setCurrentFragment(fourthFragment);
+                return true;
+            } else if (itemId == R.id.notifications) {
+                setCurrentFragment(fifthFragment);
+                return true;
             }
             return false;
         });
@@ -56,6 +56,15 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().
                 replace(R.id.flFragment, fragment).
                 commit();
+    }
+
+    @Override
+    public boolean onKeyDown(int keycode, KeyEvent e) {
+        if (keycode == KeyEvent.KEYCODE_BACK) {
+            signOut();
+            return true;
+        }
+        return super.onKeyDown(keycode, e);
     }
 
     private void signOut() {
