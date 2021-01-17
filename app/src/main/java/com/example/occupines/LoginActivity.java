@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,6 +26,8 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         utils = new Utility();
+
+        utils.removeBlinkOnTransition(LoginActivity.this);
 
         buttonEvents();
     }
@@ -59,7 +63,14 @@ public class LoginActivity extends AppCompatActivity {
 
         signUp.setOnClickListener(v -> {
             utils.toggleButton(signUp);
-            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+
+            //Shared element transition
+            ImageView imageView = findViewById(R.id.icon);
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(LoginActivity.this, imageView, "icon");
+            startActivity(intent, options.toBundle());
+
             utils.toggleButton(signUp);
         });
     }

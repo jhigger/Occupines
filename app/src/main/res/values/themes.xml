@@ -14,6 +14,9 @@
         <!-- Customize your theme here. -->
         <!-- Custom activity transition. -->
         <item name="android:windowAnimationStyle">@style/CustomActivityAnimation</item>
+        <!-- Shared element transition. -->
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowContentTransitions">true</item>
     </style>
 
     <style name="CustomActivityAnimation" parent="@android:style/Animation.Activity">

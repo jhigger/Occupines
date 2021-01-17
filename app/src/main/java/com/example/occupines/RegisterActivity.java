@@ -26,6 +26,8 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         utils = new Utility();
 
+        utils.removeBlinkOnTransition(RegisterActivity.this);
+
         buttonEvents();
     }
 

@@ -1,6 +1,9 @@
 package com.example.occupines;
 
+import android.app.Activity;
 import android.content.Context;
+import android.transition.Fade;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -8,6 +11,18 @@ public class Utility {
 
     public Utility() {
         //Empty constructor
+    }
+
+    public void removeBlinkOnTransition(Activity activity) {
+        //Exclude things from transition animation
+        Fade fade = new Fade();
+        View decor = activity.getWindow().getDecorView();
+        fade.excludeTarget(decor.findViewById(R.id.action_bar_container), true);
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        activity.getWindow().setEnterTransition(fade);
+        activity.getWindow().setExitTransition(fade);
     }
 
     public void showToast(Context context, String message) {
