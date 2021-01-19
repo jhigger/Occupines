@@ -10,7 +10,7 @@
     <string name="likes">Likes</string>
     <string name="rentals">Rentals</string>
     <string name="calendar">Calendar</string>
-    <string name="notifications">Notifications</string>
+    <string name="notification">Notification</string>
     <string name="_5th_fragment">5th fragment</string>
     <string name="_1st_fragment">1st fragment</string>
     <string name="_4th_fragment">4th fragment</string>
@@ -18,6 +18,6 @@
     <string name="_3rd_fragment">3rd fragment</string>
     <string name="full_name">Full Name</string>
     <string name="re_enter_password">Re-enter Password</string>
-    <string name="user">user</string>
-    <string name="menu">menu</string>s
+    <string name="user">User</string>
+    <string name="menu">Menu</string>
 </resources>

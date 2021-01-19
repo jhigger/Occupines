@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="design_bottom_navigation_elevation">8dp</dimen>
-    <dimen name="design_bottom_navigation_shadow_height">1dp</dimen>
-    <dimen name="design_bottom_navigation_icon_size">50dp</dimen>
-    <dimen name="design_bottom_navigation_height">75dp</dimen>
-    <dimen name="design_bottom_navigation_margin">8dp</dimen>
-    <dimen name="design_bottom_navigation_label_padding">10dp</dimen>
-    <dimen name="design_bottom_navigation_text_size">12sp</dimen>
-    <dimen name="design_bottom_navigation_active_text_size">14sp</dimen>
-    <dimen name="design_bottom_navigation_item_min_width">56dp</dimen>
-    <dimen name="design_bottom_navigation_item_max_width">96dp</dimen>
-    <dimen name="design_bottom_navigation_active_item_max_width">168dp</dimen>
-    <dimen name="design_bottom_navigation_active_item_min_width">96dp</dimen>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <dimen name="design_bottom_navigation_elevation" tools:override="true">8dp</dimen>
+    <dimen name="design_bottom_navigation_shadow_height" tools:override="true">1dp</dimen>
+    <dimen name="design_bottom_navigation_icon_size" tools:override="true">50dp</dimen>
+    <dimen name="design_bottom_navigation_height" tools:override="true">75dp</dimen>
+    <dimen name="design_bottom_navigation_margin" tools:override="true">8dp</dimen>
+    <dimen name="design_bottom_navigation_label_padding" tools:override="true">10dp</dimen>
+    <dimen name="design_bottom_navigation_text_size" tools:override="true">12sp</dimen>
+    <dimen name="design_bottom_navigation_active_text_size" tools:override="true">14sp</dimen>
+    <dimen name="design_bottom_navigation_item_min_width" tools:override="true">56dp</dimen>
+    <dimen name="design_bottom_navigation_item_max_width" tools:override="true">96dp</dimen>
+    <dimen name="design_bottom_navigation_active_item_max_width" tools:override="true">168dp</dimen>
+    <dimen name="design_bottom_navigation_active_item_min_width" tools:override="true">96dp</dimen>
 </resources>

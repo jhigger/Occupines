@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Objects;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link FirstFragment#newInstance} factory method to
@@ -34,7 +36,7 @@ public class FirstFragment extends Fragment {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
         TextView text = view.findViewById(R.id.textView);
-        String hello = "Hello " + mAuth.getCurrentUser().getDisplayName();
+        String hello = "Hello " + Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName();
         text.setText(hello);
     }
 

@@ -83,6 +83,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Log.d(TAG, "createUserWithEmail:success");
                         utils.showToast(RegisterActivity.this, "You can now sign in.");
                         FirebaseUser user = mAuth.getCurrentUser();
+                        assert user != null;
                         updateName(user);
                         updateUI(user);
                     } else {

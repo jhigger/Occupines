@@ -2,6 +2,7 @@ package com.example.occupines;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
@@ -9,18 +10,24 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.occupines.databinding.ActivityMainBinding;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+//        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
+        //Connect to Firebase
         mAuth = FirebaseAuth.getInstance();
 
         FirstFragment firstFragment = new FirstFragment();
@@ -29,9 +36,17 @@ public class MainActivity extends AppCompatActivity {
         FourthFragment fourthFragment = new FourthFragment();
         FifthFragment fifthFragment = new FifthFragment();
 
-        setCurrentFragment(firstFragment);
+        //Set first fragment on load
+        setCurrentFragment(new FirstFragment());
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+        //Add badge on notification
+        BottomNavigationView bottomNav = binding.bottomNavigationView;
+        BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.notifications);
+        //Number of notifications
+        int number = 26;
+        setupBadge(badge, number);
+
+        //Show each fragment on each menu item click
         bottomNav.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.home) {
@@ -48,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.notifications) {
                 setCurrentFragment(fifthFragment);
+                //Remove badge on notification click
+                destroyBadge(badge);
                 return true;
             }
             return false;
@@ -91,4 +108,34 @@ public class MainActivity extends AppCompatActivity {
         builder.setMessage("Sign out?").setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
     }
+
+    private void setupBadge(BadgeDrawable badge, int number) {
+        if (badge != null) {
+            if (number != 0) {
+                // An icon only badge will be displayed unless a number is set:
+                badge.setBackgroundColor(getResources().getColor(R.color.badge_color));
+                badge.setBadgeTextColor(Color.WHITE);
+                badge.setBadgeGravity(BadgeDrawable.TOP_END);
+                badge.setHorizontalOffset(26);
+                badge.setMaxCharacterCount(3);
+                badge.setNumber(number);
+                badge.setVerticalOffset(26);
+                badge.setVisible(true);
+            } else {
+                destroyBadge(badge);
+            }
+        }
+    }
+
+    private void destroyBadge(BadgeDrawable badge) {
+        badge.clearNumber();
+        badge.setVisible(false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
+
 }
