@@ -114,7 +114,7 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="24sp"
-            app:cornerRadius="20dp"
+            app:cornerRadius="50dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
