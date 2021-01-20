@@ -55,17 +55,15 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUI(FirebaseUser user) {
+    private void updateUI() {
         startActivity(new Intent(RegisterActivity.this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
         finish();
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
-    protected void updateName(FirebaseUser user) {
-        EditText fullName = findViewById(R.id.editTextFullName);
-
+    protected void updateName(FirebaseUser user, String fullName) {
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setDisplayName(fullName.getText().toString()).build();
+                .setDisplayName(fullName).build();
 
         user.updateProfile(profileUpdates)
                 .addOnCompleteListener(task -> {
@@ -83,14 +81,15 @@ public class RegisterActivity extends AppCompatActivity {
                         Log.d(TAG, "createUserWithEmail:success");
                         utils.showToast(RegisterActivity.this, "You can now sign in.");
                         FirebaseUser user = mAuth.getCurrentUser();
+                        EditText fullName = findViewById(R.id.editTextFullName);
                         assert user != null;
-                        updateName(user);
-                        updateUI(user);
+                        updateName(user, fullName.getText().toString());
+                        updateUI();
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
                         utils.showToast(RegisterActivity.this, "Authentication failed.");
-                        updateUI(null);
+                        updateUI();
                     }
                 });
     }
