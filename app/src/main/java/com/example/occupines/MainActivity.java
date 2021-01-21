@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         FifthFragment fifthFragment = new FifthFragment();
 
         //Set first fragment on load
-        setCurrentFragment(new FirstFragment());
+        setCurrentFragment(firstFragment);
 
         //Add badge on notification
         BottomNavigationView bottomNav = binding.bottomNavigationView;
@@ -80,7 +80,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keycode, KeyEvent e) {
         if (keycode == KeyEvent.KEYCODE_BACK) {
-            signOut();
+//            signOut();
+            getSupportFragmentManager().popBackStack();
             return true;
         }
         return super.onKeyDown(keycode, e);

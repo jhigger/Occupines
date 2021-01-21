@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,22 +12,58 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FirstFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class FirstFragment extends Fragment {
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    public static File localFile;
+    private StorageReference storageRef;
+    private ImageView userImage;
 
     public FirstFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+//        downloadImage();
+    }
+
+    private void downloadImage() {
+        //Create a reference with an initial file path and name
+        storageRef = FirebaseStorage.getInstance().getReference();
+
+        StorageReference pathReference = storageRef.child("kairos.png");
+
+        try {
+            localFile = File.createTempFile("profile", "png");
+
+            pathReference.getFile(localFile)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Successfully downloaded data to local file
+                        Picasso.get().load(localFile)
+                                .noPlaceholder()
+                                .error(R.drawable.ic_user)
+                                .networkPolicy(NetworkPolicy.OFFLINE)
+                                .fit()
+                                .into(userImage);
+                    })
+                    .addOnFailureListener(exception -> {
+                        // Handle failed download
+                        new Utility().showToast(getContext(), "Failed to get photo");
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -35,35 +72,25 @@ public class FirstFragment extends Fragment {
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
+        userImage = view.findViewById(R.id.user);
+        userImage.setOnClickListener(v -> setCurrentFragment(new ProfileFragment(), v));
+
         TextView text = view.findViewById(R.id.textView);
         String hello = "Hello " + Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName();
         text.setText(hello);
+
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FirstFragment.
-     */
-    public static FirstFragment newInstance(String param1, String param2) {
-        FirstFragment fragment = new FirstFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private void setCurrentFragment(Fragment fragment, View view) {
+        ImageView imageView = view.findViewById(R.id.user);
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            String mParam1 = getArguments().getString(ARG_PARAM1);
-            String mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        assert getFragmentManager() != null;
+        getFragmentManager()
+                .beginTransaction()
+                .addSharedElement(imageView, "profile")
+                .addToBackStack("FirstFragment")
+                .replace(R.id.flFragment, fragment)
+                .commit();
     }
 
     @Override

@@ -20,4 +20,7 @@
     <string name="re_enter_password">Re-enter Password</string>
     <string name="user">User</string>
     <string name="menu">Menu</string>
+    <string name="change_profile_picture">Change profile picture</string>
+    <string name="messages">Messages</string>
+    <string name="list_property">List Property</string>
 </resources>
