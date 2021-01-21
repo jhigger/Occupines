@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String TAG = "Login: ";
+    private static final String TAG = "Login";
     private FirebaseAuth mAuth;
     private Utility utils;
 

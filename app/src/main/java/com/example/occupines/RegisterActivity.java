@@ -14,7 +14,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private static final String TAG = "Register: ";
+    private static final String TAG = "Register";
     private FirebaseAuth mAuth;
     private Utility utils;
 
