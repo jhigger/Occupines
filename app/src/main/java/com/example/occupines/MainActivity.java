@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         //Show each fragment on each menu item click
         bottomNav.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
+            getSupportFragmentManager().popBackStack();
+
             if (itemId == R.id.home) {
                 setCurrentFragment(new FirstFragment());
                 return true;
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void downloadImage(FirstFragment firstFragment) {
-        StorageReference pathReference = storageRef.child("Occupines.png");
+        StorageReference pathReference = storageRef.child("kairos.png");
 
         try {
             localFile = File.createTempFile("profile", "png");

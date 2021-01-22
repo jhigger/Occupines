@@ -15,13 +15,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.util.Objects;
 
 public class FirstFragment extends Fragment {
 
     private FirebaseAuth mAuth;
-    private ImageView userImage;
 
     public FirstFragment() {
         // Required empty public constructor
@@ -37,8 +35,8 @@ public class FirstFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        userImage = view.findViewById(R.id.user);
-        getImage();
+        ImageView userImage = view.findViewById(R.id.user);
+        setImage(userImage);
         userImage.setOnClickListener(v -> setCurrentFragment(new ProfileFragment(), v));
 
         TextView text = view.findViewById(R.id.textView);
@@ -58,15 +56,12 @@ public class FirstFragment extends Fragment {
                 .commit();
     }
 
-    private void getImage() {
-        File localFile = MainActivity.localFile;
-
-        Picasso.get().load(localFile)
+    private void setImage(ImageView userImage) {
+        Picasso.get().load(MainActivity.localFile)
                 .noPlaceholder()
                 .error(R.drawable.ic_user)
                 .networkPolicy(NetworkPolicy.OFFLINE)
-                .centerCrop()
-                .resize(75, 75)
+                .fit()
                 .into(userImage);
     }
 
@@ -74,7 +69,6 @@ public class FirstFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         return inflater.inflate(R.layout.fragment_first, container, false);
     }
 }
