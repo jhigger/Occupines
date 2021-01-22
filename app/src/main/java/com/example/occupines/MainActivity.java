@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             localFile = File.createTempFile("profile", "png");
             pathReference.getFile(localFile)
-                    .addOnSuccessListener(taskSnapshot -> setCurrentFragment(firstFragment));
+                    .addOnCompleteListener(taskSnapshot -> setCurrentFragment(firstFragment));
         } catch (IOException e) {
             e.printStackTrace();
         }
