@@ -4,21 +4,28 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.KeyEvent;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.occupines.databinding.ActivityMainBinding;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private ActivityMainBinding binding;
+    public static File localFile;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,15 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
         //Connect to Firebase
         mAuth = FirebaseAuth.getInstance();
-
-        FirstFragment firstFragment = new FirstFragment();
-        SecondFragment secondFragment = new SecondFragment();
-        ThirdFragment thirdFragment = new ThirdFragment();
-        FourthFragment fourthFragment = new FourthFragment();
-        FifthFragment fifthFragment = new FifthFragment();
+        storageRef = FirebaseStorage.getInstance().getReference();
 
         //Set first fragment on load
-        setCurrentFragment(firstFragment);
+        downloadImage(new FirstFragment());
 
         //Add badge on notification
         BottomNavigationView bottomNav = binding.bottomNavigationView;
@@ -50,25 +52,37 @@ public class MainActivity extends AppCompatActivity {
         bottomNav.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.home) {
-                setCurrentFragment(firstFragment);
+                setCurrentFragment(new FirstFragment());
                 return true;
             } else if (itemId == R.id.likes) {
-                setCurrentFragment(secondFragment);
+                setCurrentFragment(new SecondFragment());
                 return true;
             } else if (itemId == R.id.rentals) {
-                setCurrentFragment(thirdFragment);
+                setCurrentFragment(new ThirdFragment());
                 return true;
             } else if (itemId == R.id.calendar) {
-                setCurrentFragment(fourthFragment);
+                setCurrentFragment(new FourthFragment());
                 return true;
             } else if (itemId == R.id.notifications) {
-                setCurrentFragment(fifthFragment);
+                setCurrentFragment(new FifthFragment());
                 //Remove badge on notification click
                 destroyBadge(badge);
                 return true;
             }
             return false;
         });
+    }
+
+    private void downloadImage(FirstFragment firstFragment) {
+        StorageReference pathReference = storageRef.child("Occupines.png");
+
+        try {
+            localFile = File.createTempFile("profile", "png");
+            pathReference.getFile(localFile)
+                    .addOnSuccessListener(taskSnapshot -> setCurrentFragment(firstFragment));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setCurrentFragment(Fragment fragment) {
@@ -78,13 +92,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onKeyDown(int keycode, KeyEvent e) {
-        if (keycode == KeyEvent.KEYCODE_BACK) {
-//            signOut();
-            getSupportFragmentManager().popBackStack();
-            return true;
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+            setCurrentFragment(new FirstFragment());
+//            super.onBackPressed();
+        } else {
+            signOut();
         }
-        return super.onKeyDown(keycode, e);
     }
 
     private void signOut() {
@@ -135,8 +151,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         binding = null;
+        super.onDestroy();
     }
 
 }

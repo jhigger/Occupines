@@ -55,6 +55,9 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         userImage = view.findViewById(R.id.user);
+
+        getImage();
+
         ImageButton edit = view.findViewById(R.id.editButton);
         TextView name = view.findViewById(R.id.fullName);
         TextView email = view.findViewById(R.id.textEmail);
@@ -64,8 +67,6 @@ public class ProfileFragment extends Fragment {
         name.setText(Objects.requireNonNull(user.getDisplayName()));
         email.setText(Objects.requireNonNull(user.getEmail()));
 
-        getImage();
-
 //        edit.setOnClickListener(v -> {
 //            Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //            startActivityForResult(gallery, 1000);
@@ -73,12 +74,13 @@ public class ProfileFragment extends Fragment {
     }
 
     private void getImage() {
-        File localFile = FirstFragment.localFile;
+        File localFile = MainActivity.localFile;
 
         Picasso.get().load(localFile)
                 .noPlaceholder()
                 .error(R.drawable.ic_user)
                 .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
                 .fit()
                 .into(userImage);
     }
