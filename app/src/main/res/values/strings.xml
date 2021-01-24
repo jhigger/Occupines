@@ -23,4 +23,5 @@
     <string name="change_profile_picture">Change profile picture</string>
     <string name="messages">Messages</string>
     <string name="list_property">List Property</string>
+    <string name="notifications">Notifications</string>
 </resources>

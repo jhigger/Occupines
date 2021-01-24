@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.MutableLiveData;
 
 import com.example.occupines.databinding.ActivityMainBinding;
 import com.google.android.material.badge.BadgeDrawable;
@@ -24,8 +25,9 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private ActivityMainBinding binding;
-    public static File localFile;
     private StorageReference storageRef;
+
+    public static File localFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +40,29 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
 
+        //Initialize fragments
+        FirstFragment firstFragment = new FirstFragment();
+        SecondFragment secondFragment = new SecondFragment();
+        ThirdFragment thirdFragment = new ThirdFragment();
+        FourthFragment fourthFragment = new FourthFragment();
+        FifthFragment fifthFragment = new FifthFragment();
+
         //Set first fragment on load
-        downloadImage(new FirstFragment());
+        downloadImage(firstFragment);
 
         //Add badge on notification
         BottomNavigationView bottomNav = binding.bottomNavigationView;
         BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.notifications);
+
         //Number of notifications
-        int number = 26;
-        setupBadge(badge, number);
+        MutableLiveData<Integer> number = new MutableLiveData<>();
+        //Initialize with a value
+        number.setValue(fifthFragment.getNotificationCount());
+        //Listener for variable
+        number.observe(MainActivity.this, integer -> {
+            destroyBadge(badge);
+            setupBadge(badge, number.getValue());
+        });
 
         //Show each fragment on each menu item click
         bottomNav.setOnNavigationItemSelectedListener(item -> {
@@ -54,25 +70,36 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().popBackStack();
 
             if (itemId == R.id.home) {
-                setCurrentFragment(new FirstFragment());
+                //1st page
+                setCurrentFragment(firstFragment);
                 return true;
             } else if (itemId == R.id.likes) {
-                setCurrentFragment(new SecondFragment());
+                //2nd page
+                addNotification(fifthFragment, "Testing", number);
+                setCurrentFragment(secondFragment);
                 return true;
             } else if (itemId == R.id.rentals) {
-                setCurrentFragment(new ThirdFragment());
+                //3rd page
+                setCurrentFragment(thirdFragment);
                 return true;
             } else if (itemId == R.id.calendar) {
-                setCurrentFragment(new FourthFragment());
+                //4th page
+                setCurrentFragment(fourthFragment);
                 return true;
             } else if (itemId == R.id.notifications) {
-                setCurrentFragment(new FifthFragment());
-                //Remove badge on notification click
+                //5th page
+                setCurrentFragment(fifthFragment);
+                //Remove badge
                 destroyBadge(badge);
                 return true;
             }
             return false;
         });
+    }
+
+    private void addNotification(FifthFragment fifthFragment, String message, MutableLiveData<Integer> number) {
+        fifthFragment.addNotification(message);
+        number.postValue(fifthFragment.getAdded());
     }
 
     private void downloadImage(FirstFragment firstFragment) {

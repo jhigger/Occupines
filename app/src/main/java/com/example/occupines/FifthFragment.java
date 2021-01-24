@@ -4,54 +4,61 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import androidx.fragment.app.Fragment;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FifthFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class FifthFragment extends Fragment {
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    String[] notifications;
+    ArrayList<String> list;
+    int added;
 
     public FifthFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FifthFragment.
-     */
-    public static FifthFragment newInstance(String param1, String param2) {
-        FifthFragment fragment = new FifthFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+        notifications = new String[]{"1", "2", "3", "4", "5", "6", "7"};
+        list = new ArrayList<>(Arrays.asList(notifications));
+        added = getNotificationCount();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            String mParam1 = getArguments().getString(ARG_PARAM1);
-            String mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_fifth, container, false);
+        View view = inflater.inflate(R.layout.fragment_fifth, container, false);
+        ListView listView = (ListView) view.findViewById(R.id.notificationList);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.fragment_fifth, R.id.textNotifications, list);
+        listView.setAdapter(arrayAdapter);
+
+        listView.setOnItemClickListener((parent, view1, position, id) -> {
+
+            list.remove(position); // remove item at index in list data source
+            arrayAdapter.notifyDataSetChanged(); // call it for refresh ListView
+        });
+
+        added = 0;
+
+        return view;
+    }
+
+    public int getNotificationCount() {
+        return list.size();
+    }
+
+    public int getAdded() {
+        return added;
+    }
+
+    public void addNotification(String message) {
+        list.add(message);
+        added += 1;
     }
 }
