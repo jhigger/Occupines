@@ -30,7 +30,6 @@
         android:layout_height="0dp"
         android:divider="@color/primary"
         android:dividerHeight="1dp"
-        android:listSelector="@color/secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
