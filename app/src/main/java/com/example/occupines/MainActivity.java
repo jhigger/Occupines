@@ -123,10 +123,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         FragmentManager fm = getSupportFragmentManager();
+        //If back button is pressed and we are not at home page
+        //Then go back 1 page
+        //Else ask if going to sign out
         if (fm.getBackStackEntryCount() > 0) {
-            fm.popBackStack();
-            setCurrentFragment(new FirstFragment());
-//            super.onBackPressed();
+            super.onBackPressed();
         } else {
             signOut();
         }
