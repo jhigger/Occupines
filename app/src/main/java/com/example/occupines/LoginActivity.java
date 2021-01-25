@@ -100,7 +100,6 @@ public class LoginActivity extends AppCompatActivity {
                             utils.showToast(LoginActivity.this, "Authentication failed: User not found.");
                         } catch (Exception e) {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                        } finally {
                             utils.showToast(LoginActivity.this, "Authentication failed.");
                         }
                         updateUI(null);

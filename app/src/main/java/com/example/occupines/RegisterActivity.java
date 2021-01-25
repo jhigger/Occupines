@@ -102,7 +102,6 @@ public class RegisterActivity extends AppCompatActivity {
                             utils.showToast(RegisterActivity.this, "Authentication failed: User already exists.");
                         } catch (Exception e) {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                        } finally {
                             utils.showToast(RegisterActivity.this, "Authentication failed.");
                         }
                         updateUI(null);
