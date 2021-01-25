@@ -9,6 +9,9 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
@@ -43,11 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             if (utils.checkInputs(name, email, password, rePassword)) {
                 if (utils.doesMatch(password, rePassword)) {
-                    if (!utils.isShort(password)) {
-                        signUp(email, password);
-                    } else {
-                        utils.showToast(RegisterActivity.this, "Password must have 8 characters or more");
-                    }
+                    signUp(email, password);
                 } else {
                     utils.showToast(RegisterActivity.this, "Password does not match.");
                 }
@@ -93,8 +92,19 @@ public class RegisterActivity extends AppCompatActivity {
                         updateUI(user);
                     } else {
                         // If sign in fails, display a message to the user.
-                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                        utils.showToast(RegisterActivity.this, "Authentication failed.");
+                        try {
+                            throw task.getException();
+                        } catch (FirebaseAuthWeakPasswordException e) {
+                            utils.showToast(RegisterActivity.this, "Authentication failed: Weak Password.");
+                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                            utils.showToast(RegisterActivity.this, "Authentication failed: Invalid Email.");
+                        } catch (FirebaseAuthUserCollisionException e) {
+                            utils.showToast(RegisterActivity.this, "Authentication failed: User already exists.");
+                        } catch (Exception e) {
+                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        } finally {
+                            utils.showToast(RegisterActivity.this, "Authentication failed.");
+                        }
                         updateUI(null);
                     }
                 });

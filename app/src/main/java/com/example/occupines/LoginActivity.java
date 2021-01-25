@@ -11,11 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String TAG = "Login";
+    private static final String TAG = "LoginActivity";
     private FirebaseAuth mAuth;
     private Utility utils;
 
@@ -93,8 +94,15 @@ public class LoginActivity extends AppCompatActivity {
                         updateUI(user);
                     } else {
                         // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInWithEmail:failure", task.getException());
-                        utils.showToast(LoginActivity.this, "Authentication failed.");
+                        try {
+                            throw task.getException();
+                        } catch (FirebaseAuthInvalidUserException e) {
+                            utils.showToast(LoginActivity.this, "Authentication failed: User not found.");
+                        } catch (Exception e) {
+                            Log.w(TAG, "signInWithEmail:failure", task.getException());
+                        } finally {
+                            utils.showToast(LoginActivity.this, "Authentication failed.");
+                        }
                         updateUI(null);
                     }
                 });
