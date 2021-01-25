@@ -43,7 +43,11 @@ public class Utility {
         return !name.isEmpty() && !email.isEmpty() && !password.isEmpty() && !rePassword.isEmpty();
     }
 
-    public boolean matchPassword(String password, String rePassword) {
+    public boolean isShort(String password) {
+        return password.length() >= 8;
+    }
+
+    public boolean doesMatch(String password, String rePassword) {
         return password.equals(rePassword);
     }
 

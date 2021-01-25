@@ -14,7 +14,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private static final String TAG = "Register";
+    private static final String TAG = "RegisterActivity";
     private FirebaseAuth mAuth;
     private Utility utils;
 
@@ -42,8 +42,12 @@ public class RegisterActivity extends AppCompatActivity {
             String rePassword = ((EditText) findViewById(R.id.rePassword)).getText().toString();
 
             if (utils.checkInputs(name, email, password, rePassword)) {
-                if (utils.matchPassword(password, rePassword)) {
-                    signUp(email, password);
+                if (utils.doesMatch(password, rePassword)) {
+                    if (!utils.isShort(password)) {
+                        signUp(email, password);
+                    } else {
+                        utils.showToast(RegisterActivity.this, "Password must have 8 characters or more");
+                    }
                 } else {
                     utils.showToast(RegisterActivity.this, "Password does not match.");
                 }
@@ -55,10 +59,15 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUI() {
-        startActivity(new Intent(RegisterActivity.this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-        finish();
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    private void updateUI(FirebaseUser user) {
+        if (user != null) {
+            EditText fullName = findViewById(R.id.editTextFullName);
+            updateName(user, fullName.getText().toString());
+
+            startActivity(new Intent(RegisterActivity.this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        }
     }
 
     protected void updateName(FirebaseUser user, String fullName) {
@@ -79,17 +88,14 @@ public class RegisterActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "createUserWithEmail:success");
-                        utils.showToast(RegisterActivity.this, "You can now sign in.");
+                        utils.showToast(RegisterActivity.this, "You are now signed in.");
                         FirebaseUser user = mAuth.getCurrentUser();
-                        EditText fullName = findViewById(R.id.editTextFullName);
-                        assert user != null;
-                        updateName(user, fullName.getText().toString());
-                        updateUI();
+                        updateUI(user);
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
                         utils.showToast(RegisterActivity.this, "Authentication failed.");
-                        updateUI();
+                        updateUI(null);
                     }
                 });
     }
