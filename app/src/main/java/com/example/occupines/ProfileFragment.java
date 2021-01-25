@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -47,9 +47,12 @@ public class ProfileFragment extends Fragment {
         ImageView userImage = view.findViewById(R.id.user);
         setImage(userImage);
 
-        ImageButton edit = view.findViewById(R.id.editButton);
+//        ImageButton edit = view.findViewById(R.id.editButton);
         TextView name = view.findViewById(R.id.fullName);
         TextView email = view.findViewById(R.id.textEmail);
+
+//        Button messages = view.findViewById(R.id.messages);
+        Button listProperty = view.findViewById(R.id.listProperty);
 
         FirebaseUser user = mAuth.getCurrentUser();
         assert user != null;
@@ -60,6 +63,16 @@ public class ProfileFragment extends Fragment {
 //            Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //            startActivityForResult(gallery, 1000);
 //        });
+
+        listProperty.setOnClickListener(v -> setCurrentFragment(new FormFragment()));
+    }
+
+    private void setCurrentFragment(Fragment fragment) {
+        getFragmentManager()
+                .beginTransaction()
+                .addToBackStack(TAG)
+                .replace(R.id.flFragment, fragment)
+                .commit();
     }
 
     private void setImage(ImageView userImage) {
