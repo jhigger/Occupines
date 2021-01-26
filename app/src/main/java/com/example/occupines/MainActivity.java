@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         StorageReference pathReference = storageRef.child("images").child(mAuth.getUid()).child("profile");
         try {
             localFile = File.createTempFile("profile", "jpg");
-            pathReference.getFile(localFile).addOnSuccessListener(v ->
+            pathReference.getFile(localFile).addOnCompleteListener(v ->
                     getSupportFragmentManager().beginTransaction().
                             add(R.id.flFragment, firstFragment).
                             commit());
