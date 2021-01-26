@@ -33,10 +33,13 @@ public class FormFragment extends Fragment {
 
     private static final String TAG = "FormFragment";
     private static final int PICK_IMAGE = 123;
-    StorageReference storageRef;
+
+    private StorageReference storageRef;
     private FirebaseAuth mAuth;
     private Uri imagePath;
     private ImageView photo;
+    private Utility utils;
+    private boolean pickedImage;
 
     public FormFragment() {
         // Required empty public constructor
@@ -47,6 +50,8 @@ public class FormFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
+        utils = new Utility();
+        pickedImage = false;
     }
 
     @Override
@@ -80,11 +85,19 @@ public class FormFragment extends Fragment {
         Button submit = view.findViewById(R.id.submit);
         submit.setOnClickListener(v -> {
             String type = spinner.getSelectedItem().toString();
-            int priceNumber = Integer.parseInt(price.getText().toString());
+            String priceString = price.getText().toString();
             String locationString = location.getText().toString();
             String infoString = info.getText().toString();
 
-            submitProperty(type, priceNumber, locationString, infoString);
+            if (utils.checkInputs(priceString, locationString, infoString)) {
+                if (pickedImage) {
+                    submitProperty(type, Integer.parseInt(priceString), locationString, infoString);
+                } else {
+                    utils.showToast(getContext(), "Please choose an image.");
+                }
+            } else {
+                utils.showToast(getContext(), "Some fields are empty.");
+            }
         });
 
         return view;
@@ -97,6 +110,7 @@ public class FormFragment extends Fragment {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath);
                 photo.setImageBitmap(bitmap);
+                pickedImage = true;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -105,17 +119,16 @@ public class FormFragment extends Fragment {
     }
 
     private void uploadImage() {
-        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property"); //images/User id/property.jpg
+        //images/User id/property.jpg
+        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");
         UploadTask uploadTask = pathReference.putFile(imagePath);
-        uploadTask.addOnCompleteListener(taskSnapshot -> {
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
             assert getFragmentManager() != null;
             getFragmentManager().popBackStack();
         });
     }
 
     private void submitProperty(String type, int price, String location, String info) {
-        uploadImage();
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> property = new HashMap<>();
@@ -127,11 +140,12 @@ public class FormFragment extends Fragment {
         db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
                 .set(property)
                 .addOnSuccessListener(aVoid -> {
-                    new Utility().showToast(getContext(), "Property submitted");
+                    utils.showToast(getContext(), "Property submitted");
                     Log.d(TAG, "DocumentSnapshot successfully written!");
+                    uploadImage();
                 })
                 .addOnFailureListener(e -> {
-                    new Utility().showToast(getContext(), "Error: Submission failed");
+                    utils.showToast(getContext(), "Error: Submission failed");
                     Log.w(TAG, "Error writing document", e);
                 });
     }

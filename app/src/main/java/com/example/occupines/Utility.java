@@ -43,6 +43,10 @@ public class Utility {
         return !name.isEmpty() && !email.isEmpty() && !password.isEmpty() && !rePassword.isEmpty();
     }
 
+    public boolean checkInputs(String price, String location, String info) {
+        return !price.isEmpty() && !location.isEmpty() && !info.isEmpty();
+    }
+
     public boolean doesMatch(String password, String rePassword) {
         return password.equals(rePassword);
     }
