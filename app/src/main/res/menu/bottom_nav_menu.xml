@@ -3,26 +3,26 @@
     <item
         android:id="@+id/home"
         android:enabled="true"
-        android:icon="@drawable/home_foreground"
+        android:icon="@drawable/ic_home"
         android:title="@string/home" />
     <item
         android:id="@+id/likes"
         android:enabled="true"
-        android:icon="@drawable/likes_foreground"
+        android:icon="@drawable/ic_likes"
         android:title="@string/likes" />
     <item
-        android:id="@+id/rentals"
+        android:id="@+id/messages"
         android:enabled="true"
-        android:icon="@drawable/rentals_foreground"
-        android:title="@string/rentals" />
+        android:icon="@drawable/ic_messages"
+        android:title="@string/messages" />
     <item
         android:id="@+id/calendar"
         android:enabled="true"
-        android:icon="@drawable/calendar_foreground"
+        android:icon="@drawable/ic_calendar"
         android:title="@string/calendar" />
     <item
         android:id="@+id/notifications"
         android:enabled="true"
-        android:icon="@drawable/notifications_foreground"
+        android:icon="@drawable/ic_notifications"
         android:title="@string/notification" />
 </menu>

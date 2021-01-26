@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 addNotification(fifthFragment, "Testing", number);
                 setCurrentFragment(secondFragment);
                 return true;
-            } else if (itemId == R.id.rentals) {
+            } else if (itemId == R.id.messages) {
                 //3rd page
                 setCurrentFragment(thirdFragment);
                 return true;
