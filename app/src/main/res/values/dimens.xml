@@ -7,10 +7,10 @@
         1dp
     </dimen>
     <dimen name="design_bottom_navigation_icon_size" tools:ignore="UnusedResources" tools:keep="@dimen/design_bottom_navigation_icon_size" tools:override="true">
-        50dp
+        30dp
     </dimen>
     <dimen name="design_bottom_navigation_height" tools:keep="@dimen/design_bottom_navigation_height" tools:override="true">
-        75dp
+        70dp
     </dimen>
     <dimen name="design_bottom_navigation_margin" tools:keep="@dimen/design_bottom_navigation_margin" tools:override="true">
         8dp

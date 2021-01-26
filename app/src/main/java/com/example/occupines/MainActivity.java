@@ -163,10 +163,8 @@ public class MainActivity extends AppCompatActivity {
                 badge.setBackgroundColor(getResources().getColor(R.color.badge_color));
                 badge.setBadgeTextColor(Color.WHITE);
                 badge.setBadgeGravity(BadgeDrawable.TOP_END);
-                badge.setHorizontalOffset(26);
                 badge.setMaxCharacterCount(3);
                 badge.setNumber(number);
-                badge.setVerticalOffset(26);
                 badge.setVisible(true);
             } else {
                 destroyBadge(badge);
