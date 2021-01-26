@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.transition.TransitionInflater;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -66,6 +69,7 @@ public class ProfileFragment extends Fragment {
         Button listProperty = view.findViewById(R.id.listProperty);
 
         FirebaseUser user = mAuth.getCurrentUser();
+        assert user != null;
         name.setText(Objects.requireNonNull(user.getDisplayName()));
         email.setText(Objects.requireNonNull(user.getEmail()));
 
@@ -76,7 +80,26 @@ public class ProfileFragment extends Fragment {
             startActivityForResult(Intent.createChooser(profileIntent, "Select Image."), PICK_IMAGE);
         });
 
-        listProperty.setOnClickListener(v -> setCurrentFragment(new FormFragment()));
+        listProperty.setOnClickListener(v -> {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
+                    .get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    assert document != null;
+                    if (document.exists()) {
+                        Log.d(TAG, "Document exists!");
+                        new Utility().showToast(getContext(), "You can only submit 1 property");
+                    } else {
+                        Log.d(TAG, "Document does not exist!");
+                        setCurrentFragment(new FormFragment());
+                    }
+                } else {
+                    Log.d(TAG, "Failed with: ", task.getException());
+                }
+            });
+
+        });
     }
 
     @Override
@@ -84,7 +107,7 @@ public class ProfileFragment extends Fragment {
         if (requestCode == PICK_IMAGE && resultCode == AppCompatActivity.RESULT_OK && data.getData() != null) {
             imagePath = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imagePath);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath);
                 userImage.setImageBitmap(bitmap);
                 uploadImage();
             } catch (IOException e) {
@@ -95,6 +118,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setCurrentFragment(Fragment fragment) {
+        assert getFragmentManager() != null;
         getFragmentManager()
                 .beginTransaction()
                 .addToBackStack(TAG)
@@ -114,12 +138,12 @@ public class ProfileFragment extends Fragment {
 
     private void uploadImage() {
         StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference pathReference = storageRef.child("images").child(mAuth.getUid()).child("profile"); //User id/Images/Profile Pic.jpg
+        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("profile"); //images/User id/profile.jpg
         UploadTask uploadTask = pathReference.putFile(imagePath);
         uploadTask
                 .addOnSuccessListener(taskSnapshot -> {
                     new Utility().showToast(getContext(), "Profile picture uploaded");
-                    Intent intent = getActivity().getIntent();
+                    Intent intent = Objects.requireNonNull(getActivity()).getIntent();
                     getActivity().finish();
                     startActivity(intent);
                 })

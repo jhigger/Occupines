@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:id="@+id/icon2"
+        android:id="@+id/photo"
         android:layout_width="200dp"
         android:layout_height="0dp"
         android:contentDescription="@string/icon"
@@ -16,8 +16,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/occupines_foreground" />
+        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:srcCompat="@drawable/ic_camera" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/add_photo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/form"
@@ -31,56 +42,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <RadioGroup
-            android:id="@+id/radio_group"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/textType"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="@string/property_type"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="@+id/spinner" />
 
-            <TextView
-                android:id="@+id/textType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/property_type" />
-
-            <RadioButton
-                android:id="@+id/radio1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_weight="1"
-                android:checked="true"
-                android:text="@string/house"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/radio2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_weight="1.35"
-                android:text="@string/apartment"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/radio3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_weight="1.2"
-                android:text="@string/boarding"
-                android:textSize="12sp" />
-
-        </RadioGroup>
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/edit_text_style"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textType"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/textPrice"
@@ -105,7 +84,7 @@
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textPrice"
-            app:layout_constraintTop_toBottomOf="@+id/radio_group"
+            app:layout_constraintTop_toBottomOf="@+id/spinner"
             tools:ignore="LabelFor" />
 
         <TextView
@@ -139,16 +118,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/info"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/info"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/Info" />
+            app:layout_constraintTop_toTopOf="@+id/info" />
 
         <EditText
-            android:id="@+id/Info"
+            android:id="@+id/info"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:layout_marginTop="1dp"
             android:background="@drawable/edit_text_style"
             android:elegantTextHeight="false"
             android:ems="10"
