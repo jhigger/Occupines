@@ -46,7 +46,7 @@
             android:id="@+id/textType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/property_type"
+            android:text="@string/type"
             app:layout_constraintBottom_toBottomOf="@+id/spinner"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/spinner" />
@@ -58,7 +58,7 @@
             android:layout_margin="10dp"
             android:background="@drawable/edit_text_style"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textType"
+            app:layout_constraintStart_toEndOf="@+id/textLocation"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -83,7 +83,7 @@
             android:padding="10dp"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textPrice"
+            app:layout_constraintStart_toEndOf="@+id/textLocation"
             app:layout_constraintTop_toBottomOf="@+id/spinner"
             tools:ignore="LabelFor" />
 
@@ -136,7 +136,7 @@
             android:padding="10dp"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textInfo"
+            app:layout_constraintStart_toEndOf="@+id/textLocation"
             app:layout_constraintTop_toBottomOf="@+id/location"
             tools:ignore="LabelFor" />
 
