@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private ActivityMainBinding binding;
-    private StorageReference storageRef;
 
     public static File localFile;
 
@@ -38,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Connect to Firebase
         mAuth = FirebaseAuth.getInstance();
-        storageRef = FirebaseStorage.getInstance().getReference();
 
         //Initialize fragments
         FirstFragment firstFragment = new FirstFragment();
@@ -102,13 +100,15 @@ public class MainActivity extends AppCompatActivity {
         number.postValue(fifthFragment.getAdded());
     }
 
-    private void downloadImage(FirstFragment firstFragment) {
-        StorageReference pathReference = storageRef.child("kairos.png");
-
+    private void downloadImage(Fragment firstFragment) {
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference pathReference = storageRef.child("images").child(mAuth.getUid()).child("profile");
         try {
-            localFile = File.createTempFile("profile", "png");
-            pathReference.getFile(localFile)
-                    .addOnCompleteListener(taskSnapshot -> setCurrentFragment(firstFragment));
+            localFile = File.createTempFile("profile", "jpg");
+            pathReference.getFile(localFile).addOnSuccessListener(v ->
+                    getSupportFragmentManager().beginTransaction().
+                            add(R.id.flFragment, firstFragment).
+                            commit());
         } catch (IOException e) {
             e.printStackTrace();
         }

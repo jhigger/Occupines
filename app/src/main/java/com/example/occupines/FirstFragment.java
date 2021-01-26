@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,25 +30,27 @@ public class FirstFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_first, container, false);
 
         ImageView userImage = view.findViewById(R.id.user);
+        userImage.setOnClickListener(v -> setCurrentFragment(new ProfileFragment(), userImage));
+
         setImage(userImage);
-        userImage.setOnClickListener(v -> setCurrentFragment(new ProfileFragment(), v));
 
         TextView text = view.findViewById(R.id.textView);
         String hello = "Hello " + Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName();
         text.setText(hello);
+
+        return view;
     }
 
-    private void setCurrentFragment(Fragment fragment, View view) {
-        ImageView imageView = view.findViewById(R.id.user);
-
-        assert getFragmentManager() != null;
+    private void setCurrentFragment(Fragment fragment, ImageView userImage) {
         getFragmentManager()
                 .beginTransaction()
-                .addSharedElement(imageView, "profile")
+                .addSharedElement(userImage, "profile")
                 .addToBackStack("FirstFragment")
                 .replace(R.id.flFragment, fragment)
                 .commit();
@@ -61,14 +61,9 @@ public class FirstFragment extends Fragment {
                 .noPlaceholder()
                 .error(R.drawable.ic_user)
                 .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerCrop()
                 .fit()
                 .into(userImage);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_first, container, false);
-    }
 }
