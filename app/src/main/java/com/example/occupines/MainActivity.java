@@ -20,6 +20,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         //Listener for variable
         number.observe(MainActivity.this, integer -> {
             destroyBadge(badge);
+            //noinspection ConstantConditions
             setupBadge(badge, number.getValue());
         });
 
@@ -102,13 +104,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void downloadImage(Fragment firstFragment) {
         StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference pathReference = storageRef.child("images").child(mAuth.getUid()).child("profile");
+        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("profile");
         try {
             localFile = File.createTempFile("profile", "jpg");
             pathReference.getFile(localFile).addOnCompleteListener(v ->
                     getSupportFragmentManager().beginTransaction().
                             add(R.id.flFragment, firstFragment).
-                            commit());
+                            commitAllowingStateLoss());
         } catch (IOException e) {
             e.printStackTrace();
         }
