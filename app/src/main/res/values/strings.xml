@@ -28,6 +28,14 @@
     <string name="info">Info</string>
     <string name="see_listing">See Listing</string>
     <string name="add_photo">Add photo</string>
+    <string name="property_image">Property image</string>
+    <string name="owner">Owner</string>
+    <string name="price_result">Price result</string>
+    <string name="type_result">Type result</string>
+    <string name="location_result">Location result</string>
+    <string name="owner_result">Owner result</string>
+    <string name="info_result">Info result</string>
+    <string name="message_owner">Message Owner</string>
 
     <string-array name="types">
         <item name="house">House</item>
