@@ -23,7 +23,7 @@
     <string name="notifications">Notifications</string>
     <string name="submit">Submit</string>
     <string name="type">Type</string>
-    <string name="price">Price</string>
+    <string name="price">Price (₱)</string>
     <string name="location">Location</string>
     <string name="info">Info</string>
     <string name="see_listing">See Listing</string>
