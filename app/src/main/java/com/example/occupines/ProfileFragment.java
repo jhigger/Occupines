@@ -30,13 +30,8 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Objects;
-
-import id.zelory.compressor.Compressor;
 
 
 public class ProfileFragment extends Fragment {
@@ -94,7 +89,7 @@ public class ProfileFragment extends Fragment {
                     assert document != null;
                     if (document.exists()) {
                         Log.d(TAG, "Document exists!");
-                        new Utility().showToast(getContext(), "You can only submit 1 property");
+                        Utility.showToast(getContext(), "You can only submit 1 property");
                     } else {
                         Log.d(TAG, "Document does not exist!");
                         setCurrentFragment(new FormFragment());
@@ -146,42 +141,16 @@ public class ProfileFragment extends Fragment {
         //images/User id/profile.jpg
         StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("profile");
         //Compress image then upload
-        UploadTask uploadTask = pathReference.putFile(compressImage(imagePath));
+        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(getContext(), imagePath));
         uploadTask
                 .addOnSuccessListener(taskSnapshot -> {
-                    new Utility().showToast(getContext(), "Profile picture uploaded");
+                    Utility.showToast(getContext(), "Profile picture uploaded");
                     //Restart activity to reload new uploaded image
                     Intent intent = Objects.requireNonNull(getActivity()).getIntent();
                     getActivity().finish();
                     startActivity(intent);
                 })
-                .addOnFailureListener(e -> new Utility().showToast(getContext(), "Error: Uploading profile picture"));
-    }
-
-    private Uri compressImage(Uri imagePath) {
-        //Getting imageUri and store in file. and compress to using compression library
-        File filesDir = Objects.requireNonNull(getContext()).getFilesDir();
-        File imageFile = new File(filesDir, "profile.jpg");
-
-        File compressedImage = null;
-        try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath);
-            OutputStream os = new FileOutputStream(imageFile);
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
-            os.flush();
-            os.close();
-
-            compressedImage = new Compressor(Objects.requireNonNull(getContext()))
-                    .setMaxWidth(250)
-                    .setMaxHeight(250)
-                    .setQuality(75)
-                    .setCompressFormat(Bitmap.CompressFormat.WEBP)
-                    .compressToFile(imageFile, "compressedImage");
-        } catch (Exception e) {
-            Log.e(getClass().getSimpleName(), "Error writing bitmap", e);
-        }
-
-        return Uri.fromFile(compressedImage);
+                .addOnFailureListener(e -> Utility.showToast(getContext(), "Error: Uploading profile picture"));
     }
 
     @Override

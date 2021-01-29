@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -38,7 +39,6 @@ public class FormFragment extends Fragment {
     private FirebaseAuth mAuth;
     private Uri imagePath;
     private ImageView photo;
-    private Utility utils;
     private boolean pickedImage;
 
     public FormFragment() {
@@ -50,7 +50,6 @@ public class FormFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
-        utils = new Utility();
         pickedImage = false;
     }
 
@@ -89,14 +88,14 @@ public class FormFragment extends Fragment {
             String locationString = location.getText().toString();
             String infoString = info.getText().toString();
 
-            if (utils.checkInputs(priceString, locationString, infoString)) {
+            if (Utility.checkInputs(priceString, locationString, infoString)) {
                 if (pickedImage) {
                     submitProperty(type, Integer.parseInt(priceString), locationString, infoString);
                 } else {
-                    utils.showToast(getContext(), "Please choose an image.");
+                    Utility.showToast(getContext(), "Please choose an image.");
                 }
             } else {
-                utils.showToast(getContext(), "Some fields are empty.");
+                Utility.showToast(getContext(), "Some fields are empty.");
             }
         });
 
@@ -121,7 +120,7 @@ public class FormFragment extends Fragment {
     private void uploadImage() {
         //images/User id/property.jpg
         StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");
-        UploadTask uploadTask = pathReference.putFile(imagePath);
+        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(getContext(), imagePath));
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             assert getFragmentManager() != null;
             getFragmentManager().popBackStack();
@@ -135,17 +134,19 @@ public class FormFragment extends Fragment {
         property.put("type", type);
         property.put("price", price);
         property.put("location", location);
+        property.put("owner", Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName());
         property.put("info", info);
+        property.put("createdAt", FieldValue.serverTimestamp());
 
         db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
                 .set(property)
                 .addOnSuccessListener(aVoid -> {
-                    utils.showToast(getContext(), "Property submitted");
                     Log.d(TAG, "DocumentSnapshot successfully written!");
                     uploadImage();
+                    Utility.showToast(getContext(), "Property submitted");
                 })
                 .addOnFailureListener(e -> {
-                    utils.showToast(getContext(), "Error: Submission failed");
+                    Utility.showToast(getContext(), "Error: Submission failed");
                     Log.w(TAG, "Error writing document", e);
                 });
     }
