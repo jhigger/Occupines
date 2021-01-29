@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         //Listener for variable
         number.observe(MainActivity.this, integer -> {
             destroyBadge(badge);
-            //noinspection ConstantConditions
             setupBadge(badge, number.getValue());
         });
 

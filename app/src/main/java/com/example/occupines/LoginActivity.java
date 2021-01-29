@@ -18,7 +18,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private FirebaseAuth mAuth;
-    private Utility utils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +25,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
-        utils = new Utility();
 
-        utils.removeBlinkOnTransition(LoginActivity.this);
+        Utility.removeBlinkOnTransition(LoginActivity.this);
 
         buttonEvents();
     }
@@ -46,24 +44,24 @@ public class LoginActivity extends AppCompatActivity {
         Button signUp = findViewById(R.id.signUp);
 
         signIn.setOnClickListener(v -> {
-            utils.toggleButton(signIn);
-            utils.toggleButton(signUp);
+            Utility.toggleButton(signIn);
+            Utility.toggleButton(signUp);
 
             String email = ((EditText) findViewById(R.id.email)).getText().toString();
             String password = ((EditText) findViewById(R.id.password)).getText().toString();
 
-            if (utils.checkInputs(email, password)) {
+            if (Utility.checkInputs(email, password)) {
                 signIn(email, password);
             } else {
-                utils.showToast(LoginActivity.this, "Some fields are empty.");
+                Utility.showToast(LoginActivity.this, "Some fields are empty.");
             }
 
-            utils.toggleButton(signIn);
-            utils.toggleButton(signUp);
+            Utility.toggleButton(signIn);
+            Utility.toggleButton(signUp);
         });
 
         signUp.setOnClickListener(v -> {
-            utils.toggleButton(signUp);
+            Utility.toggleButton(signUp);
 
             //Shared element transition
             ImageView imageView = findViewById(R.id.icon);
@@ -72,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                     makeSceneTransitionAnimation(LoginActivity.this, imageView, "icon");
             startActivity(intent, options.toBundle());
 
-            utils.toggleButton(signUp);
+            Utility.toggleButton(signUp);
         });
     }
 
@@ -89,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithEmail:success");
-                        utils.showToast(LoginActivity.this, "Login success.");
+                        Utility.showToast(LoginActivity.this, "Login success.");
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUI(user);
                     } else {
@@ -97,10 +95,10 @@ public class LoginActivity extends AppCompatActivity {
                         try {
                             throw task.getException();
                         } catch (FirebaseAuthInvalidUserException e) {
-                            utils.showToast(LoginActivity.this, "Authentication failed: User not found.");
+                            Utility.showToast(LoginActivity.this, "Authentication failed: User not found.");
                         } catch (Exception e) {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            utils.showToast(LoginActivity.this, "Authentication failed.");
+                            Utility.showToast(LoginActivity.this, "Authentication failed.");
                         }
                         updateUI(null);
                     }

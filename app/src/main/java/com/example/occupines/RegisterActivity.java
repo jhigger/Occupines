@@ -19,7 +19,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
     private FirebaseAuth mAuth;
-    private Utility utils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +26,8 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
-        utils = new Utility();
 
-        utils.removeBlinkOnTransition(RegisterActivity.this);
+        Utility.removeBlinkOnTransition(RegisterActivity.this);
 
         buttonEvents();
     }
@@ -37,24 +35,24 @@ public class RegisterActivity extends AppCompatActivity {
     private void buttonEvents() {
         Button signUp = findViewById(R.id.signUp2);
         signUp.setOnClickListener(v -> {
-            utils.toggleButton(signUp);
+            Utility.toggleButton(signUp);
 
             String name = ((EditText) findViewById(R.id.editTextFullName)).getText().toString();
             String email = ((EditText) findViewById(R.id.email)).getText().toString();
             String password = ((EditText) findViewById(R.id.password)).getText().toString();
             String rePassword = ((EditText) findViewById(R.id.rePassword)).getText().toString();
 
-            if (utils.checkInputs(name, email, password, rePassword)) {
-                if (utils.doesMatch(password, rePassword)) {
+            if (Utility.checkInputs(name, email, password, rePassword)) {
+                if (Utility.doesMatch(password, rePassword)) {
                     signUp(email, password);
                 } else {
-                    utils.showToast(RegisterActivity.this, "Password does not match.");
+                    Utility.showToast(RegisterActivity.this, "Password does not match.");
                 }
             } else {
-                utils.showToast(RegisterActivity.this, "Some fields are empty.");
+                Utility.showToast(RegisterActivity.this, "Some fields are empty.");
             }
 
-            utils.toggleButton(signUp);
+            Utility.toggleButton(signUp);
         });
     }
 
@@ -87,7 +85,7 @@ public class RegisterActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "createUserWithEmail:success");
-                        utils.showToast(RegisterActivity.this, "You are now signed in.");
+                        Utility.showToast(RegisterActivity.this, "You are now signed in.");
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUI(user);
                     } else {
@@ -95,14 +93,14 @@ public class RegisterActivity extends AppCompatActivity {
                         try {
                             throw task.getException();
                         } catch (FirebaseAuthWeakPasswordException e) {
-                            utils.showToast(RegisterActivity.this, "Authentication failed: Weak Password.");
+                            Utility.showToast(RegisterActivity.this, "Authentication failed: Weak Password.");
                         } catch (FirebaseAuthInvalidCredentialsException e) {
-                            utils.showToast(RegisterActivity.this, "Authentication failed: Invalid Email.");
+                            Utility.showToast(RegisterActivity.this, "Authentication failed: Invalid Email.");
                         } catch (FirebaseAuthUserCollisionException e) {
-                            utils.showToast(RegisterActivity.this, "Authentication failed: User already exists.");
+                            Utility.showToast(RegisterActivity.this, "Authentication failed: User already exists.");
                         } catch (Exception e) {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            utils.showToast(RegisterActivity.this, "Authentication failed.");
+                            Utility.showToast(RegisterActivity.this, "Authentication failed.");
                         }
                         updateUI(null);
                     }
