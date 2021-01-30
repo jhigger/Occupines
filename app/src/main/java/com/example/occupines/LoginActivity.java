@@ -17,16 +17,18 @@ import com.google.firebase.auth.FirebaseUser;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
+
     private FirebaseAuth mAuth;
+    private LoadingDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        Utility.removeBlinkOnTransition(LoginActivity.this);
 
         mAuth = FirebaseAuth.getInstance();
-
-        Utility.removeBlinkOnTransition(LoginActivity.this);
+        loadingDialog = new LoadingDialog(LoginActivity.this);
 
         buttonEvents();
     }
@@ -82,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn(String email, String password) {
+        loadingDialog.start();
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -102,6 +105,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         updateUI(null);
                     }
+                    loadingDialog.dismiss();
                 });
     }
 }

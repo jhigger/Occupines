@@ -27,6 +27,7 @@ public class FirstFragment extends Fragment {
     private static final String TAG = "FirstFragment";
 
     private FirebaseFirestore db;
+    private LoadingDialog loadingDialog;
 
     private TextView type;
     private TextView price;
@@ -43,6 +44,7 @@ public class FirstFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance();
+        loadingDialog = new LoadingDialog(getActivity());
     }
 
     @Override
@@ -69,6 +71,7 @@ public class FirstFragment extends Fragment {
     }
 
     private void getDocuments() {
+        loadingDialog.start();
         db.collection("properties")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -116,13 +119,13 @@ public class FirstFragment extends Fragment {
                             location.setText(document.getString("location"));
                             owner.setText(document.getString("owner"));
                             info.setText(document.getString("info"));
-                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                         } else {
                             Log.d(TAG, "No such document");
                         }
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
                     }
+                    loadingDialog.dismiss();
                 });
     }
 

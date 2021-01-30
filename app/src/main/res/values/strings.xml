@@ -36,6 +36,7 @@
     <string name="owner_result">Owner result</string>
     <string name="info_result">Info result</string>
     <string name="message_owner">Message Owner</string>
+    <string name="loading">Loading…</string>
 
     <string-array name="types">
         <item name="house">House</item>

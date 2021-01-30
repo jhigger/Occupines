@@ -37,6 +37,8 @@ public class FormFragment extends Fragment {
 
     private StorageReference storageRef;
     private FirebaseAuth mAuth;
+    private LoadingDialog loadingDialog;
+
     private Uri imagePath;
     private ImageView photo;
     private boolean pickedImage;
@@ -50,6 +52,7 @@ public class FormFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
+        loadingDialog = new LoadingDialog(getActivity());
         pickedImage = false;
     }
 
@@ -117,17 +120,8 @@ public class FormFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void uploadImage() {
-        //images/User id/property.jpg
-        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");
-        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(getContext(), imagePath));
-        uploadTask.addOnSuccessListener(taskSnapshot -> {
-            assert getFragmentManager() != null;
-            getFragmentManager().popBackStack();
-        });
-    }
-
     private void submitProperty(String type, int price, String location, String info) {
+        loadingDialog.start();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> property = new HashMap<>();
@@ -141,7 +135,6 @@ public class FormFragment extends Fragment {
         db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
                 .set(property)
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "DocumentSnapshot successfully written!");
                     uploadImage();
                     Utility.showToast(getContext(), "Property submitted");
                 })
@@ -149,6 +142,17 @@ public class FormFragment extends Fragment {
                     Utility.showToast(getContext(), "Error: Submission failed");
                     Log.w(TAG, "Error writing document", e);
                 });
+    }
+
+    private void uploadImage() {
+        //images/User id/property.jpg
+        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");
+        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(getContext(), imagePath));
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            assert getFragmentManager() != null;
+            getFragmentManager().popBackStack();
+            loadingDialog.dismiss();
+        });
     }
 
 }
