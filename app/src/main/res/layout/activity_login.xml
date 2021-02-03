@@ -76,7 +76,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/buttons"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -34,7 +34,7 @@ public class FifthFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_fifth, container, false);
-        ListView listView = (ListView) view.findViewById(R.id.notificationList);
+        ListView listView = view.findViewById(R.id.notificationList);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.fragment_fifth, R.id.textNotifications, list);
         listView.setAdapter(arrayAdapter);
 
