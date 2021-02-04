@@ -1,5 +1,7 @@
 package com.example.occupines;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,7 @@ public class FirstFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -29,6 +32,14 @@ public class FirstFragment extends Fragment {
         ImageView userImage = view.findViewById(R.id.user);
         userImage.setOnClickListener(v -> setCurrentFragment(new ProfileFragment(), userImage));
         setImage(userImage);
+
+        ImageView burgerMenu = view.findViewById(R.id.burgerMenu);
+        burgerMenu.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setView(inflater.inflate(R.layout.about_dialog, null))
+                    .create()
+                    .show();
+        });
 
         return view;
     }

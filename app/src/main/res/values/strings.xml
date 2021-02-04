@@ -47,4 +47,38 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="view_property">View Property</string>
+    <string name="logo">Logo</string>
+    <string name="about_us"><b>About Us</b>\n
+        \n
+        Occupines is a residential property rental finder application specifically targeted at tenants
+        who are in a look for rental homes in the different parts of Baguio City. Started as a project
+        by University students, Occupines envisions to help with the ease of search for rental homes,
+        provide utility on the go and help in the advertisement of rental spaces here in Baguio City
+        with just a simple tap or press of a button on your mobile phone. At Occupines, we believe by
+        creating our application we provide a quality and customer friendly tool for various Tenants
+                to use here in the City of Pines.\n
+        \n
+        <b>F.A.Q. (Frequently Asked Questions)</b>\n
+        \n
+        Q: What does the application do?\n
+        A:  Occupines list rental spaces for tenants to look for, provides utility, and make it easier
+        to find a rental home.\n
+        \n
+        Q: Which rental homes does the application list?\n
+        A: Occupines list houses, apartments, and boarding houses.\n
+        \n
+        Q: Are payment transactions done within the Occupines application?\n
+        A: No, payment transactions are done between the Landlord and the Tenant.\n
+        \n
+        Q: Is Occupines available for IoS?\n
+        A: No, Occupines is exclusive only on Android.\n
+        \n
+        Q: Can I use Occupines outside of Baguio?\n
+        A: No, Occupines is restricted to rental spaces here in Baguio City.\n
+        \n
+        Q: How do I list my property?\n
+        A: By registering an account on the application and selecting the list property option.\n
+        \n
+        Q: Is the application free to use?\n
+        A: Yes, the application is free to use for Tenants and Landlords in Baguio City.</string>
 </resources>
