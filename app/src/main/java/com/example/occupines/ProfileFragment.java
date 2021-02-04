@@ -37,9 +37,11 @@ import java.util.Objects;
 public class ProfileFragment extends Fragment {
 
     private static final String TAG = "ProfileFragment";
+    private static final String COLLECTION = "properties";
     private static final int PICK_IMAGE = 123;
 
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
     private Uri imagePath;
     private ImageView userImage;
 
@@ -52,6 +54,7 @@ public class ProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -65,7 +68,7 @@ public class ProfileFragment extends Fragment {
         TextView name = view.findViewById(R.id.fullName);
         TextView email = view.findViewById(R.id.textEmail);
 
-//        Button messages = view.findViewById(R.id.messages);
+        Button viewProperty = view.findViewById(R.id.viewProperty);
         Button listProperty = view.findViewById(R.id.listProperty);
 
         FirebaseUser user = mAuth.getCurrentUser();
@@ -80,26 +83,39 @@ public class ProfileFragment extends Fragment {
             startActivityForResult(Intent.createChooser(profileIntent, "Select Image."), PICK_IMAGE);
         });
 
-        listProperty.setOnClickListener(v -> {
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
-                    .get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    assert document != null;
-                    if (document.exists()) {
-                        Log.d(TAG, "Document exists!");
-                        Utility.showToast(getContext(), "You can only submit 1 property");
+        viewProperty.setOnClickListener(v -> db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
+                .get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        assert document != null;
+                        if (document.exists()) {
+                            Log.d(TAG, "Document exists!");
+                            setCurrentFragment(new PropertyFragment());
+                        } else {
+                            Log.d(TAG, "Document does not exist!");
+                            Utility.showToast(getContext(), "You have no property listed");
+                        }
                     } else {
-                        Log.d(TAG, "Document does not exist!");
-                        setCurrentFragment(new FormFragment());
+                        Log.d(TAG, "Failed with: ", task.getException());
                     }
-                } else {
-                    Log.d(TAG, "Failed with: ", task.getException());
-                }
-            });
+                }));
 
-        });
+        listProperty.setOnClickListener(v -> db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
+                .get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        assert document != null;
+                        if (document.exists()) {
+                            Log.d(TAG, "Document exists!");
+                            Utility.showToast(getContext(), "You can only submit 1 property");
+                        } else {
+                            Log.d(TAG, "Document does not exist!");
+                            setCurrentFragment(new FormFragment());
+                        }
+                    } else {
+                        Log.d(TAG, "Failed with: ", task.getException());
+                    }
+                }));
     }
 
     @Override
@@ -141,7 +157,7 @@ public class ProfileFragment extends Fragment {
         //images/User id/profile.jpg
         StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("profile");
         //Compress image then upload
-        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(getContext(), imagePath));
+        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
         uploadTask
                 .addOnSuccessListener(taskSnapshot -> {
                     Utility.showToast(getContext(), "Profile picture uploaded");
