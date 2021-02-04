@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         //Listener for variable
         number.observe(MainActivity.this, integer -> {
             destroyBadge(badge);
+            //noinspection ConstantConditions
             setupBadge(badge, number.getValue());
         });
 
@@ -116,18 +117,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setCurrentFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction().
+        FragmentManager fm = getSupportFragmentManager();
+        fm.popBackStack(fragment.getTag(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fm.beginTransaction().
                 replace(R.id.flFragment, fragment).
                 commit();
     }
 
     @Override
     public void onBackPressed() {
-        FragmentManager fm = getSupportFragmentManager();
         //If back button is pressed and we are not at home page
         //Then go back 1 page
         //Else ask if going to sign out
-        if (fm.getBackStackEntryCount() > 0) {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             super.onBackPressed();
         } else {
             signOut();

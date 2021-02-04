@@ -134,10 +134,7 @@ public class FormFragment extends Fragment {
 
         db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
                 .set(property)
-                .addOnSuccessListener(aVoid -> {
-                    uploadImage();
-                    Utility.showToast(getContext(), "Property submitted");
-                })
+                .addOnSuccessListener(aVoid -> uploadImage())
                 .addOnFailureListener(e -> {
                     Utility.showToast(getContext(), "Error: Submission failed");
                     Log.w(TAG, "Error writing document", e);
@@ -147,11 +144,12 @@ public class FormFragment extends Fragment {
     private void uploadImage() {
         //images/User id/property.jpg
         StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");
-        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(getContext(), imagePath));
+        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
         uploadTask.addOnSuccessListener(taskSnapshot -> {
+            Utility.showToast(getContext(), "Property submitted");
+            loadingDialog.dismiss();
             assert getFragmentManager() != null;
             getFragmentManager().popBackStack();
-            loadingDialog.dismiss();
         });
     }
 
