@@ -28,7 +28,8 @@ public class FourthFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         CalendarView calendarView = view.findViewById(R.id.calendarView);
-        setDate(calendarView, "3/26/2015");
+        calendarView.setDate(System.currentTimeMillis());
+//        setDate(calendarView, "3/26/2015");
     }
 
     public void setDate(CalendarView calendarView, String date) {
