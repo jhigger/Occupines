@@ -66,7 +66,7 @@ public class FirstFragment extends Fragment {
                 .error(R.drawable.ic_user)
                 .networkPolicy(NetworkPolicy.OFFLINE)
                 .centerCrop()
-                .fit()
+                .resize(500, 500)
                 .into(userImage);
     }
 

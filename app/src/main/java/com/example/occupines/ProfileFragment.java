@@ -148,7 +148,7 @@ public class ProfileFragment extends Fragment {
                 .error(R.drawable.ic_user)
                 .networkPolicy(NetworkPolicy.OFFLINE)
                 .centerCrop()
-                .resize(200, 200)
+                .resize(500, 500)
                 .into(userImage);
     }
 
