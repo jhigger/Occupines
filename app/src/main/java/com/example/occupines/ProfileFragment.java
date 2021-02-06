@@ -1,5 +1,7 @@
 package com.example.occupines;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -70,6 +73,7 @@ public class ProfileFragment extends Fragment {
 
         Button viewProperty = view.findViewById(R.id.viewProperty);
         Button listProperty = view.findViewById(R.id.listProperty);
+        Button signOut = view.findViewById(R.id.signOut);
 
         FirebaseUser user = mAuth.getCurrentUser();
         assert user != null;
@@ -116,6 +120,34 @@ public class ProfileFragment extends Fragment {
                         Log.d(TAG, "Failed with: ", task.getException());
                     }
                 }));
+
+        signOut.setOnClickListener(v -> signOut());
+    }
+
+    private void signOut() {
+        Activity activity = (Activity) getContext();
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    mAuth.signOut();
+                    startActivity(new Intent(activity, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                    assert activity != null;
+                    activity.finish();
+                    activity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        };
+
+        assert activity != null;
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage("Sign out?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
 
     @Override
