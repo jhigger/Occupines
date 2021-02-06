@@ -1,8 +1,11 @@
 package com.example.occupines;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.File;
 
-public class PropertyPost {
+public class PropertyPost implements Parcelable {
 
     private File localFile;
     private String type;
@@ -18,6 +21,25 @@ public class PropertyPost {
         this.location = location;
         this.owner = owner;
         this.info = info;
+    }
+
+    public static final Creator<PropertyPost> CREATOR = new Creator<PropertyPost>() {
+        @Override
+        public PropertyPost createFromParcel(Parcel in) {
+            return new PropertyPost(in);
+        }
+
+        @Override
+        public PropertyPost[] newArray(int size) {
+            return new PropertyPost[size];
+        }
+    };
+
+    protected PropertyPost(Parcel in) {
+        type = in.readString();
+        price = in.readDouble();
+        location = in.readString();
+        info = in.readString();
     }
 
     public File getLocalFile() {
@@ -66,5 +88,18 @@ public class PropertyPost {
 
     public void setInfo(String info) {
         this.info = info;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(type);
+        dest.writeDouble(price);
+        dest.writeString(location);
+        dest.writeString(info);
     }
 }

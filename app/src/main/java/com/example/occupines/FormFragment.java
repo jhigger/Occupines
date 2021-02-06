@@ -15,6 +15,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -24,6 +26,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -43,8 +47,22 @@ public class FormFragment extends Fragment {
     private ImageView photo;
     private boolean pickedImage;
 
+    private Spinner type;
+    private EditText price;
+    private EditText location;
+    private EditText info;
+    private Button submit;
+
     public FormFragment() {
         // Required empty public constructor
+    }
+
+    public static FormFragment newInstance(PropertyPost property) {
+        FormFragment fragment = new FormFragment();
+        Bundle args = new Bundle();
+        args.putParcelable("property", property);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -71,29 +89,29 @@ public class FormFragment extends Fragment {
             startActivityForResult(Intent.createChooser(profileIntent, "Select Image."), PICK_IMAGE);
         });
 
-        Spinner spinner = view.findViewById(R.id.spinner);
+        type = view.findViewById(R.id.spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.types, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);
+        type.setAdapter(adapter);
 
-        EditText price = view.findViewById(R.id.price);
-        EditText location = view.findViewById(R.id.location);
-        EditText info = view.findViewById(R.id.info);
+        price = view.findViewById(R.id.price);
+        location = view.findViewById(R.id.location);
+        info = view.findViewById(R.id.info);
 
-        Button submit = view.findViewById(R.id.submit);
+        submit = view.findViewById(R.id.submit);
         submit.setOnClickListener(v -> {
-            String type = spinner.getSelectedItem().toString();
+            String typeString = type.getSelectedItem().toString();
             String priceString = price.getText().toString();
             String locationString = location.getText().toString();
             String infoString = info.getText().toString();
 
             if (Utility.checkInputs(priceString, locationString, infoString)) {
                 if (pickedImage) {
-                    submitProperty(type, Integer.parseInt(priceString), locationString, infoString);
+                    submitProperty(typeString, Double.parseDouble(priceString), locationString, infoString);
                 } else {
                     Utility.showToast(getContext(), "Please choose an image.");
                 }
@@ -103,6 +121,47 @@ public class FormFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (getArguments() != null) {
+            PropertyPost property = getArguments().getParcelable("property");
+
+            Picasso.get().load(property.getLocalFile())
+                    .placeholder(R.drawable.ic_camera)
+                    .error(R.drawable.ic_camera)
+                    .priority(Picasso.Priority.HIGH)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .centerInside()
+                    .fit()
+                    .into(photo);
+
+            switch (property.getType()) {
+                case "House":
+                    type.setSelection(0);
+                    break;
+                case "Apartment":
+                    type.setSelection(1);
+                    break;
+                case "Boarding":
+                    type.setSelection(2);
+                    break;
+            }
+
+            price.setText(String.valueOf(property.getPrice()));
+            location.setText(property.getLocation());
+            info.setText(property.getInfo());
+
+            submit.setText(R.string.save);
+            submit.setOnClickListener(v -> updateProperty(
+                    type.getSelectedItem().toString(),
+                    Double.parseDouble(price.getText().toString()),
+                    location.getText().toString(),
+                    info.getText().toString()
+            ));
+        }
     }
 
     @Override
@@ -120,7 +179,36 @@ public class FormFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void submitProperty(String type, int price, String location, String info) {
+    private void updateProperty(String type, double price, String location, String info) {
+        loadingDialog.start();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> property = new HashMap<>();
+        property.put("type", type);
+        property.put("price", price);
+        property.put("location", location);
+        property.put("info", info);
+        property.put("updatedAt", FieldValue.serverTimestamp());
+
+        db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
+                .update(property)
+                .addOnCompleteListener(task -> loadingDialog.dismiss())
+                .addOnSuccessListener(aVoid -> {
+                    if (pickedImage) {
+                        uploadImage();
+                    } else {
+                        assert getFragmentManager() != null;
+                        getFragmentManager().popBackStack();
+                    }
+                    Utility.showToast(getContext(), "Property updated");
+                })
+                .addOnFailureListener(e -> {
+                    Utility.showToast(getContext(), "Error: Submission failed");
+                    Log.w(TAG, "Error writing document", e);
+                });
+    }
+
+    private void submitProperty(String type, double price, String location, String info) {
         loadingDialog.start();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -134,7 +222,11 @@ public class FormFragment extends Fragment {
 
         db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
                 .set(property)
-                .addOnSuccessListener(aVoid -> uploadImage())
+                .addOnCompleteListener(task -> loadingDialog.dismiss())
+                .addOnSuccessListener(aVoid -> {
+                    uploadImage();
+                    Utility.showToast(getContext(), "Property submitted");
+                })
                 .addOnFailureListener(e -> {
                     Utility.showToast(getContext(), "Error: Submission failed");
                     Log.w(TAG, "Error writing document", e);
@@ -146,8 +238,6 @@ public class FormFragment extends Fragment {
         StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");
         UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
         uploadTask.addOnSuccessListener(taskSnapshot -> {
-            Utility.showToast(getContext(), "Property submitted");
-            loadingDialog.dismiss();
             assert getFragmentManager() != null;
             getFragmentManager().popBackStack();
         });

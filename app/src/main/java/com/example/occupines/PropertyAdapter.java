@@ -36,7 +36,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View listItem = layoutInflater.inflate(R.layout.property_template, parent, false);
-        return new ViewHolder(listItem);
+        return new ViewHolder(listItem, listData);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
         private final StorageReference storageRef;
         private final LoadingDialog loadingDialog;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(View itemView, ArrayList<PropertyPost> listData) {
             super(itemView);
 
             this.context = ((AppCompatActivity) itemView.getContext());
@@ -120,7 +120,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
                     context.getSupportFragmentManager()
                             .beginTransaction()
                             .addToBackStack("PropertyFragment")
-                            .replace(R.id.flFragment, new FormFragment())
+                            .replace(R.id.flFragment, FormFragment.newInstance(listData.get(0)))
                             .commit());
         }
 
