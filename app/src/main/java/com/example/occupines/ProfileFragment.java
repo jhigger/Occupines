@@ -7,12 +7,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,6 +27,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -67,8 +70,9 @@ public class ProfileFragment extends Fragment {
         userImage = view.findViewById(R.id.user);
         setImage(userImage);
 
-        ImageButton edit = view.findViewById(R.id.editButton);
+        ImageButton changePicture = view.findViewById(R.id.changePicture);
         TextView name = view.findViewById(R.id.fullName);
+        ImageButton editName = view.findViewById(R.id.editName);
         TextView email = view.findViewById(R.id.textEmail);
 
         Button viewProperty = view.findViewById(R.id.viewProperty);
@@ -80,12 +84,14 @@ public class ProfileFragment extends Fragment {
         name.setText(Objects.requireNonNull(user.getDisplayName()));
         email.setText(Objects.requireNonNull(user.getEmail()));
 
-        edit.setOnClickListener(v -> {
+        changePicture.setOnClickListener(v -> {
             Intent profileIntent = new Intent();
             profileIntent.setType("image/*");
             profileIntent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(Intent.createChooser(profileIntent, "Select Image."), PICK_IMAGE);
         });
+
+        editName.setOnClickListener(v -> changeName());
 
         viewProperty.setOnClickListener(v -> db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
                 .get().addOnCompleteListener(task -> {
@@ -148,6 +154,57 @@ public class ProfileFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage("Sign out?").setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
+    }
+
+    private void changeName() {
+        Activity activity = (Activity) getContext();
+        final EditText input = new EditText(activity);
+
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    if (!input.getText().toString().isEmpty())
+                        updateName(Objects.requireNonNull(mAuth.getCurrentUser()), input.getText().toString());
+                    else
+                        Utility.showToast(getContext(), "Field is empty");
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        };
+
+        assert activity != null;
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setView(input);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        builder.setMessage("Change name").setPositiveButton("Save", dialogClickListener)
+                .setNegativeButton("Cancel", dialogClickListener).show();
+    }
+
+    private void updateName(FirebaseUser user, String fullName) {
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setDisplayName(fullName).build();
+
+        user.updateProfile(profileUpdates)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Utility.showToast(getContext(), "Name updated");
+                        Log.d(TAG, "User profile updated.");
+                        reloadCurrentFragment();
+                    }
+                });
+    }
+
+    private void reloadCurrentFragment() {
+        assert getFragmentManager() != null;
+        getFragmentManager()
+                .beginTransaction()
+                .detach(this)
+                .attach(this)
+                .commit();
     }
 
     @Override

@@ -33,7 +33,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
-            android:id="@+id/editButton"
+            android:id="@+id/changePicture"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
@@ -60,6 +60,20 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/editName"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        android:contentDescription="@string/change_name"
+        android:elevation="2dp"
+        android:src="@drawable/ic_edit"
+        app:layout_constraintBottom_toBottomOf="@+id/fullName"
+        app:layout_constraintStart_toEndOf="@+id/fullName"
+        app:layout_constraintTop_toTopOf="@+id/fullName" />
 
     <TextView
         android:id="@+id/textEmail"

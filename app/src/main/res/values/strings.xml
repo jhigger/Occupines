@@ -83,4 +83,5 @@
         A: Yes, the application is free to use for Tenants and Landlords in Baguio City.</string>
     <string name="save">Save</string>
     <string name="sign_out">Sign out</string>
+    <string name="change_name">Change name</string>
 </resources>
