@@ -48,6 +48,8 @@ public class ProfileFragment extends Fragment {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private StorageReference storageRef;
+
     private Uri imagePath;
     private ImageView userImage;
 
@@ -61,6 +63,7 @@ public class ProfileFragment extends Fragment {
         setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        storageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -241,21 +244,30 @@ public class ProfileFragment extends Fragment {
                 .into(userImage);
     }
 
+    private void updateImageUrl(FirebaseUser user, String url) {
+        db.collection("users").document(user.getUid()).update("imageUrl", url);
+    }
+
     private void uploadImage() {
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
         //images/User id/profile.jpg
         StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("profile");
         //Compress image then upload
         UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
-        uploadTask
-                .addOnSuccessListener(taskSnapshot -> {
-                    Utility.showToast(getContext(), "Profile picture uploaded");
-                    //Restart activity to reload new uploaded image
-                    Intent intent = Objects.requireNonNull(getActivity()).getIntent();
-                    getActivity().finish();
-                    startActivity(intent);
-                })
-                .addOnFailureListener(e -> Utility.showToast(getContext(), "Error: Uploading profile picture"));
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            pathReference.getDownloadUrl()
+                    .addOnSuccessListener(uri -> {
+                        // Got the download URL for 'images/User id/profile.jpg'
+                        updateImageUrl(Objects.requireNonNull(mAuth.getCurrentUser()), uri.toString());
+                        Log.d(TAG, uri.toString());
+                    }).addOnFailureListener(exception -> {
+                // Handle any errors
+            });
+            Utility.showToast(getContext(), "Profile picture uploaded");
+            //Restart activity to reload new uploaded image
+            Intent intent = Objects.requireNonNull(getActivity()).getIntent();
+            getActivity().finish();
+            startActivity(intent);
+        }).addOnFailureListener(e -> Utility.showToast(getContext(), "Error: Uploading profile picture"));
     }
 
     @Override

@@ -14,13 +14,17 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
+
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         Utility.removeBlinkOnTransition(RegisterActivity.this);
 
@@ -69,16 +74,21 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    protected void updateName(FirebaseUser user, String fullName) {
+    private void updateName(FirebaseUser firebaseUser, String fullName) {
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setDisplayName(fullName).build();
 
-        user.updateProfile(profileUpdates)
+        firebaseUser.updateProfile(profileUpdates)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "User profile updated.");
                     }
                 });
+
+        HashMap<String, Object> user = new HashMap<>();
+        user.put("username", fullName);
+        user.put("imageUrl", "");
+        db.collection("users").document(firebaseUser.getUid()).set(user);
     }
 
     private void signUp(String email, String password) {
