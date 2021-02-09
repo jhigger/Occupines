@@ -15,6 +15,8 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.Objects;
+
 public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
@@ -91,7 +93,7 @@ public class RegisterActivity extends AppCompatActivity {
                     } else {
                         // If sign in fails, display a message to the user.
                         try {
-                            throw task.getException();
+                            throw Objects.requireNonNull(task.getException());
                         } catch (FirebaseAuthWeakPasswordException e) {
                             Utility.showToast(RegisterActivity.this, "Authentication failed: Weak Password.");
                         } catch (FirebaseAuthInvalidCredentialsException e) {
