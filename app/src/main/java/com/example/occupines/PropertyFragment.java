@@ -119,10 +119,10 @@ public class PropertyFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
         itemsData.clear();
         mAdapter = null;
         recyclerView.setAdapter(null);
+        super.onDestroyView();
     }
 }
