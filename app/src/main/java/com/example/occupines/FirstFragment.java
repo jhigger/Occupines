@@ -47,7 +47,7 @@ public class FirstFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getChildFragmentManager().beginTransaction().replace(R.id.propertyPosts, new ListFragment()).commit();
+        getChildFragmentManager().beginTransaction().replace(R.id.propertyPosts, new ListFragment()).commitNow();
     }
 
     private void setCurrentFragment(Fragment fragment, ImageView userImage) {

@@ -32,6 +32,7 @@ public class PropertyFragment extends Fragment {
     private StorageReference storageRef;
     private LoadingDialog loadingDialog;
 
+    private RecyclerView recyclerView;
     private PropertyAdapter mAdapter;
     private ArrayList<PropertyPost> itemsData;
 
@@ -55,7 +56,7 @@ public class PropertyFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_property, container, false);
 
         // 1. get a reference to recyclerView
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewProperty);
+        recyclerView = view.findViewById(R.id.recyclerViewProperty);
         // 2. set layoutManger
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         // this is data for recycler view
@@ -73,6 +74,7 @@ public class PropertyFragment extends Fragment {
 
     private void getData() {
         loadingDialog.start();
+        itemsData.clear();
         db.collection(COLLECTION).document(userId)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -101,6 +103,9 @@ public class PropertyFragment extends Fragment {
                                     mAdapter.notifyDataSetChanged();
                                     loadingDialog.dismiss();
                                 });
+                                if (localFile.delete()) {
+                                    Log.d(TAG, "Temp file deleted");
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -111,5 +116,13 @@ public class PropertyFragment extends Fragment {
                         Log.d(TAG, "get failed with ", task.getException());
                     }
                 });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        itemsData.clear();
+        mAdapter = null;
+        recyclerView.setAdapter(null);
     }
 }

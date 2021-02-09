@@ -1,5 +1,6 @@
 package com.example.occupines;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,7 +12,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -26,12 +26,12 @@ import java.util.Objects;
 public class ListFragment extends Fragment {
 
     private static final String TAG = "ListFragment";
-    private final String COLLECTION = "properties";
 
     private FirebaseFirestore db;
     private StorageReference storageRef;
     private LoadingDialog loadingDialog;
 
+    private RecyclerView recyclerView;
     private MyListAdapter mAdapter;
     private ArrayList<PropertyPost> itemsData;
 
@@ -54,7 +54,7 @@ public class ListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
 
         // 1. get a reference to recyclerView
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView = view.findViewById(R.id.recyclerView);
         // 2. set layoutManger
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         // this is data for recycler view
@@ -71,13 +71,46 @@ public class ListFragment extends Fragment {
 
     private void getDocuments() {
         loadingDialog.start();
-        db.collection(COLLECTION)
+        itemsData.clear();
+        db.collection("properties")
                 .orderBy("createdAt", Query.Direction.ASCENDING)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                            getData(document.getId());
+                            if (document.exists()) {
+                                String documentId = document.getId();
+                                StorageReference propertyImageRef = storageRef
+                                        .child("images")
+                                        .child(documentId)
+                                        .child("property");
+
+                                try {
+                                    File localFile = File.createTempFile(documentId, "jpg");
+                                    Log.d(TAG, Uri.fromFile(localFile).toString());
+                                    propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
+                                        //noinspection ConstantConditions
+                                        PropertyPost propertyPost = new PropertyPost(
+                                                localFile,
+                                                document.getString("type"),
+                                                document.getDouble("price"),
+                                                document.getString("location"),
+                                                document.getString("owner"),
+                                                document.getString("info"));
+
+                                        itemsData.add(propertyPost);
+                                        mAdapter.notifyDataSetChanged();
+                                        loadingDialog.dismiss();
+                                    });
+                                    if (localFile.delete()) {
+                                        Log.d(TAG, "Temp file deleted");
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
                         }
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
@@ -85,44 +118,11 @@ public class ListFragment extends Fragment {
                 });
     }
 
-    private void getData(String documentId) {
-        db.collection(COLLECTION).document(documentId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        assert document != null;
-                        if (document.exists()) {
-                            StorageReference propertyImageRef = storageRef
-                                    .child("images")
-                                    .child(documentId)
-                                    .child("property");
-
-                            try {
-                                File localFile = File.createTempFile(documentId, "jpg");
-                                propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
-                                    //noinspection ConstantConditions
-                                    PropertyPost propertyPost = new PropertyPost(
-                                            localFile,
-                                            document.getString("type"),
-                                            document.getDouble("price"),
-                                            document.getString("location"),
-                                            document.getString("owner"),
-                                            document.getString("info"));
-
-                                    itemsData.add(propertyPost);
-                                    mAdapter.notifyDataSetChanged();
-                                });
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            Log.d(TAG, "No such document");
-                        }
-                    } else {
-                        Log.d(TAG, "get failed with ", task.getException());
-                    }
-                    loadingDialog.dismiss();
-                });
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        itemsData.clear();
+        mAdapter = null;
+        recyclerView.setAdapter(null);
     }
 }
