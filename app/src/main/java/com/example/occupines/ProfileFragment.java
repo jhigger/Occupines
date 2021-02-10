@@ -29,7 +29,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -56,6 +55,7 @@ public class ProfileFragment extends Fragment {
 
     private Uri imagePath;
     private ImageView userImage;
+    private TextView name;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -79,7 +79,7 @@ public class ProfileFragment extends Fragment {
         setImage(userImage);
 
         ImageButton changePicture = view.findViewById(R.id.changePicture);
-        TextView name = view.findViewById(R.id.fullName);
+        name = view.findViewById(R.id.fullName);
         ImageButton editName = view.findViewById(R.id.editName);
         TextView email = view.findViewById(R.id.textEmail);
 
@@ -167,6 +167,8 @@ public class ProfileFragment extends Fragment {
     private void changeName() {
         Activity activity = (Activity) getContext();
         final EditText input = new EditText(activity);
+        input.setText(name.getText().toString());
+        input.setSelectAllOnFocus(true);
 
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which) {
@@ -210,12 +212,13 @@ public class ProfileFragment extends Fragment {
         loadingDialog.start();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        Map<String, Object> property = new HashMap<>();
-        property.put("owner", username);
-        property.put("updatedAt", FieldValue.serverTimestamp());
+        Map<String, Object> name = new HashMap<>();
+        name.put("owner", username);
 
-        db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
-                .update(property)
+        db.collection("properties").document(Objects.requireNonNull(mAuth.getUid())).update(name);
+
+        db.collection("users").document(Objects.requireNonNull(mAuth.getUid()))
+                .update("username", username)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> Utility.showToast(getContext(), "User name updated"))
                 .addOnFailureListener(e -> {
