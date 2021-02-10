@@ -19,10 +19,12 @@ import java.util.ArrayList;
 
 public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder> {
     private final ArrayList<PropertyPost> listData;
+    private final String userId;
 
     // RecyclerView recyclerView;
-    public MyListAdapter(ArrayList<PropertyPost> listData) {
+    public MyListAdapter(ArrayList<PropertyPost> listData, String userId) {
         this.listData = listData;
+        this.userId = userId;
     }
 
     @NonNull
@@ -50,13 +52,18 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
         holder.owner.setText(myListData.getOwner());
         holder.info.setText(myListData.getInfo());
 
-        holder.message.setOnClickListener(v -> {
-            Intent intent = new Intent(holder.context, ChatActivity.class);
-            intent.putExtra("id", myListData.getId());
-            holder.context.startActivity(intent);
-        });
-        holder.like.setOnClickListener(v -> {
-        });
+        if (myListData.getId().equals(userId)) {
+            holder.messageButton.setVisibility(View.GONE);
+            holder.likeButton.setVisibility(View.GONE);
+        } else {
+            holder.messageButton.setOnClickListener(v -> {
+                Intent intent = new Intent(holder.context, ChatActivity.class);
+                intent.putExtra("id", myListData.getId());
+                holder.context.startActivity(intent);
+            });
+            holder.likeButton.setOnClickListener(v -> {
+            });
+        }
     }
 
     @Override
@@ -72,8 +79,8 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
         public final TextView owner;
         public final TextView info;
 
-        public final Button message;
-        public final Button like;
+        public final Button messageButton;
+        public final Button likeButton;
 
         public final AppCompatActivity context;
 
@@ -85,8 +92,8 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
             this.location = itemView.findViewById(R.id.locationResult);
             this.owner = itemView.findViewById(R.id.ownerResult);
             this.info = itemView.findViewById(R.id.infoResult);
-            this.message = itemView.findViewById(R.id.message);
-            this.like = itemView.findViewById(R.id.like);
+            this.messageButton = itemView.findViewById(R.id.message);
+            this.likeButton = itemView.findViewById(R.id.like);
             this.context = (AppCompatActivity) itemView.getContext();
         }
     }

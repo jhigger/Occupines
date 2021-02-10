@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -27,6 +29,7 @@ public class ListFragment extends Fragment {
 
     private static final String TAG = "ListFragment";
 
+    private FirebaseUser user;
     private FirebaseFirestore db;
     private StorageReference storageRef;
     private LoadingDialog loadingDialog;
@@ -42,6 +45,7 @@ public class ListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        user = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
         loadingDialog = new LoadingDialog(getActivity());
@@ -61,7 +65,7 @@ public class ListFragment extends Fragment {
         itemsData = new ArrayList<>();
         getDocuments();
         // 3. create an adapter
-        mAdapter = new MyListAdapter(itemsData);
+        mAdapter = new MyListAdapter(itemsData, user.getUid());
         // 4. set adapter
         recyclerView.setAdapter(mAdapter);
         // 5. set item animator to DefaultAnimator
