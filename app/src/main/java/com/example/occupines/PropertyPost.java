@@ -13,14 +13,16 @@ public class PropertyPost implements Parcelable {
     private String location;
     private String owner;
     private String info;
+    private String id;
 
-    public PropertyPost(File localFile, String type, double price, String location, String owner, String info) {
+    public PropertyPost(File localFile, String type, double price, String location, String owner, String info, String id) {
         this.localFile = localFile;
         this.type = type;
         this.price = price;
         this.location = location;
         this.owner = owner;
         this.info = info;
+        this.id = id;
     }
 
     public static final Creator<PropertyPost> CREATOR = new Creator<PropertyPost>() {
@@ -88,6 +90,14 @@ public class PropertyPost implements Parcelable {
 
     public void setInfo(String info) {
         this.info = info;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override

@@ -1,12 +1,15 @@
 package com.example.occupines;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.NetworkPolicy;
@@ -46,6 +49,14 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
         holder.location.setText(myListData.getLocation());
         holder.owner.setText(myListData.getOwner());
         holder.info.setText(myListData.getInfo());
+
+        holder.message.setOnClickListener(v -> {
+            Intent intent = new Intent(holder.context, ChatActivity.class);
+            intent.putExtra("id", myListData.getId());
+            holder.context.startActivity(intent);
+        });
+        holder.like.setOnClickListener(v -> {
+        });
     }
 
     @Override
@@ -61,6 +72,11 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
         public final TextView owner;
         public final TextView info;
 
+        public final Button message;
+        public final Button like;
+
+        public final AppCompatActivity context;
+
         public ViewHolder(View itemView) {
             super(itemView);
             this.photo = itemView.findViewById(R.id.photoResult);
@@ -69,6 +85,9 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
             this.location = itemView.findViewById(R.id.locationResult);
             this.owner = itemView.findViewById(R.id.ownerResult);
             this.info = itemView.findViewById(R.id.infoResult);
+            this.message = itemView.findViewById(R.id.message);
+            this.like = itemView.findViewById(R.id.like);
+            this.context = (AppCompatActivity) itemView.getContext();
         }
     }
 }

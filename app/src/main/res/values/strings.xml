@@ -84,4 +84,7 @@
     <string name="save">Save</string>
     <string name="sign_out">Sign out</string>
     <string name="change_name">Change name</string>
+    <string name="username">username</string>
+    <string name="send">Send</string>
+    <string name="type_your_message">Type your message…</string>
 </resources>

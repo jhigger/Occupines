@@ -96,7 +96,8 @@ public class ListFragment extends Fragment {
                                                 document.getDouble("price"),
                                                 document.getString("location"),
                                                 document.getString("owner"),
-                                                document.getString("info"));
+                                                document.getString("info"),
+                                                documentId);
 
                                         itemsData.add(propertyPost);
                                         mAdapter.notifyDataSetChanged();
