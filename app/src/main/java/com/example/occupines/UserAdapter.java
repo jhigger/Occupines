@@ -1,5 +1,6 @@
 package com.example.occupines;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.NetworkPolicy;
@@ -41,6 +43,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 .resize(500, 500)
                 .into(holder.profileImage);
         holder.username.setText(user.getUsername());
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(holder.context, ChatActivity.class);
+            intent.putExtra("id", user.getId());
+            holder.context.startActivity(intent);
+        });
     }
 
     @Override
@@ -53,10 +60,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         public final ImageView profileImage;
         public final TextView username;
 
+        public final AppCompatActivity context;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             profileImage = itemView.findViewById(R.id.profileImage);
             username = itemView.findViewById(R.id.username);
+            this.context = (AppCompatActivity) itemView.getContext();
         }
     }
 }
