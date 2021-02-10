@@ -29,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -37,6 +38,8 @@ import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -49,6 +52,7 @@ public class ProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private StorageReference storageRef;
+    private LoadingDialog loadingDialog;
 
     private Uri imagePath;
     private ImageView userImage;
@@ -64,6 +68,7 @@ public class ProfileFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
+        loadingDialog = new LoadingDialog(getActivity());
     }
 
     @Override
@@ -167,7 +172,7 @@ public class ProfileFragment extends Fragment {
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
-                    if (!input.getText().toString().isEmpty())
+                    if (!input.getText().toString().trim().isEmpty())
                         updateName(Objects.requireNonNull(mAuth.getCurrentUser()), input.getText().toString());
                     else
                         Utility.showToast(getContext(), "Field is empty");
@@ -182,7 +187,7 @@ public class ProfileFragment extends Fragment {
         assert activity != null;
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(input);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
         builder.setMessage("Change name").setPositiveButton("Save", dialogClickListener)
                 .setNegativeButton("Cancel", dialogClickListener).show();
     }
@@ -194,10 +199,28 @@ public class ProfileFragment extends Fragment {
         user.updateProfile(profileUpdates)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Utility.showToast(getContext(), "Name updated");
+                        updateProperty(fullName);
                         Log.d(TAG, "User profile updated.");
                         reloadCurrentFragment();
                     }
+                });
+    }
+
+    private void updateProperty(String username) {
+        loadingDialog.start();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> property = new HashMap<>();
+        property.put("owner", username);
+        property.put("updatedAt", FieldValue.serverTimestamp());
+
+        db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
+                .update(property)
+                .addOnCompleteListener(task -> loadingDialog.dismiss())
+                .addOnSuccessListener(aVoid -> Utility.showToast(getContext(), "User name updated"))
+                .addOnFailureListener(e -> {
+                    Utility.showToast(getContext(), "Error: Submission failed");
+                    Log.w(TAG, "Error writing document", e);
                 });
     }
 
