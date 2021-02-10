@@ -90,7 +90,6 @@ public class PropertyFragment extends Fragment {
                             try {
                                 File localFile = File.createTempFile(userId, "jpg");
                                 propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
-                                    //noinspection ConstantConditions
                                     PropertyPost propertyPost = new PropertyPost(
                                             localFile,
                                             document.getString("type"),
@@ -101,7 +100,7 @@ public class PropertyFragment extends Fragment {
                                             userId);
 
                                     itemsData.add(propertyPost);
-                                    mAdapter.notifyDataSetChanged();
+                                    if (mAdapter != null) mAdapter.notifyDataSetChanged();
                                     loadingDialog.dismiss();
                                 });
                                 if (localFile.delete()) {
@@ -121,7 +120,6 @@ public class PropertyFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        itemsData.clear();
         mAdapter = null;
         recyclerView.setAdapter(null);
         super.onDestroyView();

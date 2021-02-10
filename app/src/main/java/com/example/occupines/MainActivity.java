@@ -60,14 +60,13 @@ public class MainActivity extends AppCompatActivity {
         //Listener for variable
         number.observe(MainActivity.this, integer -> {
             destroyBadge(badge);
-            //noinspection ConstantConditions
             setupBadge(badge, number.getValue());
         });
 
         //Show each fragment on each menu item click
         bottomNav.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
-            getSupportFragmentManager().popBackStack();
+            getSupportFragmentManager().popBackStackImmediate();
 
             if (itemId == R.id.home) {
                 //1st page
@@ -118,10 +117,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void setCurrentFragment(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
-        fm.popBackStack(fragment.getTag(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        fm.beginTransaction().
-                replace(R.id.flFragment, fragment).
-                commit();
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fm.beginTransaction()
+                .replace(R.id.flFragment, fragment)
+                .commit();
     }
 
     @Override
