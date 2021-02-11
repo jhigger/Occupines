@@ -9,9 +9,7 @@
     <string name="home">Home</string>
     <string name="likes">Likes</string>
     <string name="calendar">Calendar</string>
-    <string name="notification">Notification</string>
     <string name="_2nd_fragment">2nd fragment</string>
-    <string name="_3rd_fragment">3rd fragment</string>
     <string name="full_name">Full Name</string>
     <string name="re_enter_password">Re-enter Password</string>
     <string name="user">User</string>
@@ -19,13 +17,11 @@
     <string name="change_profile_picture">Change profile picture</string>
     <string name="messages">Messages</string>
     <string name="list_property">List Property</string>
-    <string name="notifications">Notifications</string>
     <string name="submit">Submit</string>
     <string name="type">Type</string>
     <string name="price">Price (₱)</string>
     <string name="location">Location</string>
     <string name="info">Info</string>
-    <string name="see_listing">See Listing</string>
     <string name="add_photo">Add photo</string>
     <string name="property_image">Property image</string>
     <string name="owner">Owner</string>
