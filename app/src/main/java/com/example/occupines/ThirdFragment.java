@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -22,15 +21,17 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class ThirdFragment extends Fragment {
 
     private static final String TAG = "ThirdFragment";
     private static final String COLLECTION = "messages";
 
-    private FirebaseUser user;
+    private FirebaseUser currentUser;
     private FirebaseFirestore db;
     private StorageReference storageRef;
     private LoadingDialog loadingDialog;
@@ -38,6 +39,7 @@ public class ThirdFragment extends Fragment {
     private RecyclerView recyclerView;
     private UserAdapter userAdapter;
     private List<User> users;
+    private Set<String> usersList;
 
     public ThirdFragment() {
         // Required empty public constructor
@@ -46,7 +48,7 @@ public class ThirdFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
         loadingDialog = new LoadingDialog(getActivity());
@@ -61,6 +63,7 @@ public class ThirdFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         users = new ArrayList<>();
+        usersList = new LinkedHashSet<>();
 
         getMessages();
 
@@ -71,32 +74,28 @@ public class ThirdFragment extends Fragment {
 
     private void getMessages() {
         loadingDialog.start();
-        users.clear();
+        usersList.clear();
 
         db.collection(COLLECTION)
-                .whereEqualTo("sender", user.getUid())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                            String receiverId = document.getString("receiver");
-                            getUserInfo(receiverId);
-                            loadingDialog.dismiss();
-                        }
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
-                    }
-                });
+                            Chat chat = new Chat(
+                                    document.getString("sender"),
+                                    document.getString("receiver"),
+                                    document.getString("message")
+                            );
 
-        db.collection(COLLECTION)
-                .whereEqualTo("receiver", user.getUid())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                            String senderId = document.getString("sender");
-                            getUserInfo(senderId);
-                            loadingDialog.dismiss();
+                            if (chat.getReceiver().equals(currentUser.getUid())) {
+                                usersList.add(chat.getSender());
+                            }
+                            if (chat.getSender().equals(currentUser.getUid())) {
+                                usersList.add(chat.getReceiver());
+                            }
+
+                            Log.d(TAG, "usersList: " + usersList.size());
+                            getUserInfo();
                         }
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
@@ -104,32 +103,49 @@ public class ThirdFragment extends Fragment {
                 });
     }
 
-    private void getUserInfo(String userId) {
-        db.collection("users").document(userId).get().addOnCompleteListener(task -> {
-            DocumentSnapshot document = task.getResult();
-            String username = document.getString("username");
+    private void getUserInfo() {
+        users.clear();
 
-            StorageReference propertyImageRef = storageRef
-                    .child("images")
-                    .child(userId)
-                    .child("profile");
+        db.collection("users").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                    if (document.exists()) {
+                        String userId = document.getId();
+                        String username = document.getString("username");
 
-            try {
-                File localFile = File.createTempFile(userId, "jpg");
-                Log.d(TAG, Uri.fromFile(localFile).toString());
-                propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
-                    users.add(new User(userId, username, localFile));
-                    userAdapter.notifyDataSetChanged();
-                });
-                if (localFile.delete()) {
-                    Log.d(TAG, "Temp file deleted");
+                        StorageReference profileImageRef = storageRef
+                                .child("images")
+                                .child(userId)
+                                .child("profile");
+
+                        try {
+                            File localFile = File.createTempFile(userId, "jpg");
+                            Log.d(TAG, Uri.fromFile(localFile).toString());
+                            profileImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
+                                User newUser = new User(userId, username, localFile);
+                                if (users.size() != usersList.size()) {
+                                    for (String id : usersList) {
+                                        if (newUser.getId().equals(id) && !users.contains(newUser)) {
+                                            users.add(newUser);
+                                            Log.d(TAG, "users: " + users.size());
+                                        }
+                                    }
+                                }
+
+                                if (userAdapter != null) userAdapter.notifyDataSetChanged();
+                                loadingDialog.dismiss();
+                            });
+                            if (localFile.delete()) {
+                                Log.d(TAG, "Temp file deleted");
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         });
     }
-
 
     @Override
     public void onDestroyView() {

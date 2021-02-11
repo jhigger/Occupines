@@ -84,15 +84,17 @@ public class ChatActivity extends AppCompatActivity {
         String finalUserId = userId;
         sendButton.setOnClickListener(v -> {
             EditText chatMessage = findViewById(R.id.chatMessage);
-            String message = chatMessage.getText().toString();
-            if (!message.trim().isEmpty()) {
-                sendMessage(finalUserId, message.trim());
+            String message = chatMessage.getText().toString().trim();
+            if (!message.isEmpty()) {
+                sendMessage(currentUser.getUid(), finalUserId, message);
             } else Utility.showToast(this, "Empty message not allowed");
             chatMessage.setText("");
         });
     }
 
     private void getUserInfo(String userId) {
+        loadingDialog.start();
+
         db.collection("users").document(userId)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -139,9 +141,9 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
-    private void sendMessage(String receiver, String msg) {
+    private void sendMessage(String sender, String receiver, String msg) {
         Map<String, Object> message = new HashMap<>();
-        message.put("sender", currentUser.getUid());
+        message.put("sender", sender);
         message.put("receiver", receiver);
         message.put("message", msg);
         message.put("createdAt", FieldValue.serverTimestamp());
@@ -156,8 +158,6 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void readMessages(String myId, String userId, User user) {
-        loadingDialog.start();
-
         db.collection(COLLECTION)
                 .orderBy("createdAt", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, e) -> {
