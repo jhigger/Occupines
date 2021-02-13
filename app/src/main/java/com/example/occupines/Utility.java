@@ -2,6 +2,8 @@ package com.example.occupines;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -11,6 +13,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -19,6 +25,7 @@ import id.zelory.compressor.Compressor;
 
 public class Utility {
 
+    //Compresses the image to a smaller size for faster loading
     public static Uri compressImage(Context context, Uri imagePath) {
         //Getting imageUri and store in file. and compress to using compression library
         File filesDir = context.getFilesDir();
@@ -45,6 +52,7 @@ public class Utility {
         return Uri.fromFile(compressedImage);
     }
 
+    //Fixes shared element transition bug
     public static void removeBlinkOnTransition(Activity activity) {
         //Exclude things from transition animation
         Fade fade = new Fade();
@@ -62,25 +70,37 @@ public class Utility {
                 Toast.LENGTH_SHORT).show();
     }
 
+    //Disables or enables a button
     public static void toggleButton(Button btn) {
         boolean toggle = btn.isEnabled();
         btn.setEnabled(!toggle);
     }
 
-    public static boolean checkInputs(String email, String password) {
-        return !email.isEmpty() && !password.isEmpty();
-    }
+    //Sign out dialog
+    public static void signOut(Activity activity, FirebaseAuth mAuth) {
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    //Sign out current user
+                    mAuth.signOut();
+                    //Starts the LoginActivity and clears the activity stack
+                    activity.startActivity(new Intent(activity, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                    //Closes the MainActivity
+                    activity.finish();
+                    //Changes animation transition to fade in and fade out
+                    activity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        };
 
-    public static boolean checkInputs(String name, String email, String password, String rePassword) {
-        return !name.isEmpty() && !email.isEmpty() && !password.isEmpty() && !rePassword.isEmpty();
-    }
-
-    public static boolean checkInputs(String price, String location, String info) {
-        return !price.isEmpty() && !location.isEmpty() && !info.isEmpty();
-    }
-
-    public static boolean doesMatch(String password, String rePassword) {
-        return password.equals(rePassword);
+        //Show dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage("Sign out?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
 
 }

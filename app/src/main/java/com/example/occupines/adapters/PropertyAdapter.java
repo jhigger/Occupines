@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.adapters;
 
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
@@ -13,6 +13,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.LoadingDialog;
+import com.example.occupines.R;
+import com.example.occupines.Utility;
+import com.example.occupines.fragments.FormFragment;
+import com.example.occupines.models.Property;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -24,10 +29,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHolder> {
-    private final ArrayList<PropertyPost> listData;
+    private final ArrayList<Property> listData;
 
     // RecyclerView recyclerView;
-    public PropertyAdapter(ArrayList<PropertyPost> listData) {
+    public PropertyAdapter(ArrayList<Property> listData) {
         this.listData = listData;
     }
 
@@ -41,7 +46,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final PropertyPost myListData = listData.get(position);
+        final Property myListData = listData.get(position);
         Picasso.get().load(myListData.getLocalFile())
                 .placeholder(R.drawable.ic_camera)
                 .error(R.drawable.ic_camera)
@@ -78,7 +83,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
         private final StorageReference storageRef;
         private final LoadingDialog loadingDialog;
 
-        public ViewHolder(View itemView, ArrayList<PropertyPost> listData) {
+        public ViewHolder(View itemView, ArrayList<Property> listData) {
             super(itemView);
 
             this.context = ((AppCompatActivity) itemView.getContext());

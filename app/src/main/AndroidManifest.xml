@@ -20,7 +20,7 @@
         android:roundIcon="@mipmap/occupines_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Occupines">
-        <activity android:name=".SplashScreen">
+        <activity android:name=".SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

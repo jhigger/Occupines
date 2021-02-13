@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.fragments;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -25,6 +25,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.occupines.LoadingDialog;
+import com.example.occupines.MainActivity;
+import com.example.occupines.R;
+import com.example.occupines.Utility;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -44,11 +48,13 @@ import java.util.Objects;
 
 public class ProfileFragment extends Fragment {
 
+    //Setup global variables
     private static final String TAG = "ProfileFragment";
     private static final String COLLECTION = "properties";
     private static final int PICK_IMAGE = 123;
 
     private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
     private FirebaseFirestore db;
     private StorageReference storageRef;
     private LoadingDialog loadingDialog;
@@ -61,21 +67,24 @@ public class ProfileFragment extends Fragment {
         // Required empty public constructor
     }
 
+    //Instantiate objects
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
         mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
         loadingDialog = new LoadingDialog(getActivity());
+        //Set shared element transition
+        setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        userImage = view.findViewById(R.id.user);
+        userImage = view.findViewById(R.id.userImage);
         setImage(userImage);
 
         ImageButton changePicture = view.findViewById(R.id.changePicture);
@@ -87,10 +96,8 @@ public class ProfileFragment extends Fragment {
         Button listProperty = view.findViewById(R.id.listProperty);
         Button signOut = view.findViewById(R.id.signOut);
 
-        FirebaseUser user = mAuth.getCurrentUser();
-        assert user != null;
-        name.setText(Objects.requireNonNull(user.getDisplayName()));
-        email.setText(Objects.requireNonNull(user.getEmail()));
+        name.setText(Objects.requireNonNull(currentUser.getDisplayName()));
+        email.setText(Objects.requireNonNull(currentUser.getEmail()));
 
         changePicture.setOnClickListener(v -> {
             Intent profileIntent = new Intent();
@@ -101,7 +108,7 @@ public class ProfileFragment extends Fragment {
 
         editName.setOnClickListener(v -> changeName());
 
-        viewProperty.setOnClickListener(v -> db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
+        viewProperty.setOnClickListener(v -> db.collection(COLLECTION).document(currentUser.getUid())
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -118,7 +125,7 @@ public class ProfileFragment extends Fragment {
                     }
                 }));
 
-        listProperty.setOnClickListener(v -> db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
+        listProperty.setOnClickListener(v -> db.collection(COLLECTION).document(currentUser.getUid())
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -135,35 +142,11 @@ public class ProfileFragment extends Fragment {
                     }
                 }));
 
-        signOut.setOnClickListener(v -> signOut());
+        //Show signOut dialog on signOut click
+        signOut.setOnClickListener(v -> Utility.signOut(getActivity(), mAuth));
     }
 
-    private void signOut() {
-        Activity activity = (Activity) getContext();
-        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
-            switch (which) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    //Yes button clicked
-                    mAuth.signOut();
-                    startActivity(new Intent(activity, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                    assert activity != null;
-                    activity.finish();
-                    activity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-
-                    break;
-
-                case DialogInterface.BUTTON_NEGATIVE:
-                    //No button clicked
-                    break;
-            }
-        };
-
-        assert activity != null;
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage("Sign out?").setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
-    }
-
+    //Changes current username
     private void changeName() {
         Activity activity = (Activity) getContext();
         final EditText input = new EditText(activity);
@@ -175,7 +158,7 @@ public class ProfileFragment extends Fragment {
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
                     if (!input.getText().toString().trim().isEmpty())
-                        updateName(Objects.requireNonNull(mAuth.getCurrentUser()), input.getText().toString());
+                        updateName(currentUser, input.getText().toString());
                     else
                         Utility.showToast(getContext(), "Field is empty");
                     break;
@@ -215,9 +198,9 @@ public class ProfileFragment extends Fragment {
         Map<String, Object> name = new HashMap<>();
         name.put("owner", username);
 
-        db.collection("properties").document(Objects.requireNonNull(mAuth.getUid())).update(name);
+        db.collection("properties").document(currentUser.getUid()).update(name);
 
-        db.collection("users").document(Objects.requireNonNull(mAuth.getUid()))
+        db.collection("users").document(currentUser.getUid())
                 .update("username", username)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> Utility.showToast(getContext(), "User name updated"))
@@ -276,14 +259,14 @@ public class ProfileFragment extends Fragment {
 
     private void uploadImage() {
         //images/User id/profile.jpg
-        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("profile");
+        StorageReference pathReference = storageRef.child("images").child(currentUser.getUid()).child("profile");
         //Compress image then upload
         UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             pathReference.getDownloadUrl()
                     .addOnSuccessListener(uri -> {
                         // Got the download URL for 'images/User id/profile.jpg'
-                        updateImageUrl(Objects.requireNonNull(mAuth.getCurrentUser()), uri.toString());
+                        updateImageUrl(currentUser, uri.toString());
                         Log.d(TAG, uri.toString());
                     }).addOnFailureListener(exception -> {
                 // Handle any errors

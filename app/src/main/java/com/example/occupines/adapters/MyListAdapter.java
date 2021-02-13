@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.adapters;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -12,17 +12,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.ChatActivity;
+import com.example.occupines.R;
+import com.example.occupines.models.Property;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder> {
-    private final ArrayList<PropertyPost> listData;
+    private final ArrayList<Property> listData;
     private final String userId;
 
     // RecyclerView recyclerView;
-    public MyListAdapter(ArrayList<PropertyPost> listData, String userId) {
+    public MyListAdapter(ArrayList<Property> listData, String userId) {
         this.listData = listData;
         this.userId = userId;
     }
@@ -37,7 +40,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final PropertyPost myListData = listData.get(position);
+        final Property myListData = listData.get(position);
         Picasso.get().load(myListData.getLocalFile())
                 .placeholder(R.drawable.ic_camera)
                 .error(R.drawable.ic_camera)

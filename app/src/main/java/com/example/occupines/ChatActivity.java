@@ -13,6 +13,9 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.adapters.MessageAdapter;
+import com.example.occupines.models.Chat;
+import com.example.occupines.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -31,9 +34,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ChatActivity extends AppCompatActivity {
 
+    //Setup global variables
     private static final String TAG = "ChatActivity";
     private static final String COLLECTION = "messages";
 
@@ -50,10 +55,12 @@ public class ChatActivity extends AppCompatActivity {
     private User user;
     private RecyclerView recyclerView;
 
+    //ChatActivity starts here
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        //Initialize objects
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
@@ -71,23 +78,33 @@ public class ChatActivity extends AppCompatActivity {
         // 5. set item animator to DefaultAnimator
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        //Get references
         username = findViewById(R.id.username);
         userImage = findViewById(R.id.userImage);
 
+        //Get arguments from previous fragment/activity
         Bundle extras = getIntent().getExtras();
         String userId = "";
         if (extras != null) userId = extras.getString("id");
 
+        //Call getUserInfo method
         getUserInfo(userId);
 
+        //Get sendButton reference
         ImageButton sendButton = findViewById(R.id.sendButton);
         String finalUserId = userId;
+        //Set sendButton on click event
         sendButton.setOnClickListener(v -> {
+            //Get chatMessage reference
             EditText chatMessage = findViewById(R.id.chatMessage);
+            //Get String from chatMessage
             String message = chatMessage.getText().toString().trim();
+            //Check if message is empty
             if (!message.isEmpty()) {
+                //Call sendMessage method
                 sendMessage(currentUser.getUid(), finalUserId, message);
             } else Utility.showToast(this, "Empty message not allowed");
+            //Set chatMessage to empty
             chatMessage.setText("");
         });
     }
@@ -141,13 +158,16 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
+    //Creates new document in messages collection
     private void sendMessage(String sender, String receiver, String msg) {
+        //Map key value pairs
         Map<String, Object> message = new HashMap<>();
         message.put("sender", sender);
         message.put("receiver", receiver);
         message.put("message", msg);
         message.put("createdAt", FieldValue.serverTimestamp());
 
+        //Upload to firestore
         db.collection("messages").document()
                 .set(message)
                 .addOnSuccessListener(aVoid -> Utility.showToast(this, "Message sent"))
@@ -157,6 +177,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
+    //Gets individual messages and turns it into conversation
     private void readMessages(String myId, String userId, User user) {
         db.collection(COLLECTION)
                 .orderBy("createdAt", Query.Direction.ASCENDING)
@@ -167,7 +188,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
                     //Redraw on data change
                     chats.clear();
-                    for (QueryDocumentSnapshot document : value) {
+                    for (QueryDocumentSnapshot document : Objects.requireNonNull(value)) {
                         Chat chat = new Chat(
                                 document.getString("sender"),
                                 document.getString("receiver"),
@@ -188,6 +209,7 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        //Set values to null to prevent memory leak
         messageAdapter = null;
         recyclerView.setAdapter(null);
         super.onDestroy();

@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.fragments;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +20,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.occupines.LoadingDialog;
+import com.example.occupines.R;
+import com.example.occupines.Utility;
+import com.example.occupines.models.Property;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,6 +42,7 @@ public class FormFragment extends Fragment {
 
     private static final String TAG = "FormFragment";
     private static final int PICK_IMAGE = 123;
+    private static final String COLLECTION = "properties";
 
     private StorageReference storageRef;
     private FirebaseAuth mAuth;
@@ -57,7 +62,7 @@ public class FormFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static FormFragment newInstance(PropertyPost property) {
+    public static FormFragment newInstance(Property property) {
         FormFragment fragment = new FormFragment();
         Bundle args = new Bundle();
         args.putParcelable("property", property);
@@ -79,16 +84,18 @@ public class FormFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_form, container, false);
-
+        //Get ImageView reference
         photo = view.findViewById(R.id.photo);
-
+        //Set ImageView on click event
         photo.setOnClickListener(v -> {
             Intent profileIntent = new Intent();
             profileIntent.setType("image/*");
             profileIntent.setAction(Intent.ACTION_GET_CONTENT);
+            //Open gallery to select photo
             startActivityForResult(Intent.createChooser(profileIntent, "Select Image."), PICK_IMAGE);
         });
 
+        //Get spinner reference
         type = view.findViewById(R.id.spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
@@ -98,19 +105,26 @@ public class FormFragment extends Fragment {
         // Apply the adapter to the spinner
         type.setAdapter(adapter);
 
+        //Get field references
         price = view.findViewById(R.id.price);
         location = view.findViewById(R.id.location);
         info = view.findViewById(R.id.info);
 
+        //Get button reference
         submit = view.findViewById(R.id.submit);
+        //Set button on click event
         submit.setOnClickListener(v -> {
+            //Get String from fields
             String typeString = type.getSelectedItem().toString();
             String priceString = price.getText().toString();
             String locationString = location.getText().toString();
             String infoString = info.getText().toString();
 
-            if (Utility.checkInputs(priceString, locationString, infoString)) {
+            //Check if fields are empty
+            if (!priceString.isEmpty() && !locationString.isEmpty() && !infoString.isEmpty()) {
+                //Check if user already picked an image from gallery
                 if (pickedImage) {
+                    //Call submitProperty method
                     submitProperty(typeString, Double.parseDouble(priceString), locationString, infoString);
                 } else {
                     Utility.showToast(getContext(), "Please choose an image.");
@@ -126,17 +140,12 @@ public class FormFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        //Check if data given from other fragment is empty
+        //It is not empty if FormFragment was called from edit property
         if (getArguments() != null) {
-            PropertyPost property = getArguments().getParcelable("property");
+            Property property = getArguments().getParcelable("property");
 
-            Picasso.get().load(property.getLocalFile())
-                    .placeholder(R.drawable.ic_camera)
-                    .error(R.drawable.ic_camera)
-                    .priority(Picasso.Priority.HIGH)
-                    .networkPolicy(NetworkPolicy.OFFLINE)
-                    .centerInside()
-                    .fit()
-                    .into(photo);
+            downloadImage(property);
 
             switch (property.getType()) {
                 case "House":
@@ -164,6 +173,7 @@ public class FormFragment extends Fragment {
         }
     }
 
+    //Takes image from gallery
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PICK_IMAGE && resultCode == AppCompatActivity.RESULT_OK && data.getData() != null) {
@@ -179,6 +189,7 @@ public class FormFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    //Updates property from edit property
     private void updateProperty(String type, double price, String location, String info) {
         loadingDialog.start();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -190,7 +201,7 @@ public class FormFragment extends Fragment {
         property.put("info", info);
         property.put("updatedAt", FieldValue.serverTimestamp());
 
-        db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
+        db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
                 .update(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
@@ -208,6 +219,7 @@ public class FormFragment extends Fragment {
                 });
     }
 
+    //Submits property to firestore properties collection
     private void submitProperty(String type, double price, String location, String info) {
         loadingDialog.start();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -220,7 +232,7 @@ public class FormFragment extends Fragment {
         property.put("info", info);
         property.put("createdAt", FieldValue.serverTimestamp());
 
-        db.collection("properties").document(Objects.requireNonNull(mAuth.getUid()))
+        db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
                 .set(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
@@ -233,6 +245,19 @@ public class FormFragment extends Fragment {
                 });
     }
 
+    //Downloads the photo from firebase storage when editing
+    private void downloadImage(Property property) {
+        Picasso.get().load(property.getLocalFile())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(photo);
+    }
+
+    //Uploads the photo chosen from gallery to firebase storage
     private void uploadImage() {
         //images/User id/property.jpg
         StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");

@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.models;
 
 public class Chat {
 

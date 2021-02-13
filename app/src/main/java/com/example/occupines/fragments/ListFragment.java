@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.fragments;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +12,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.LoadingDialog;
+import com.example.occupines.R;
+import com.example.occupines.adapters.MyListAdapter;
+import com.example.occupines.models.Property;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -36,7 +40,7 @@ public class ListFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private MyListAdapter mAdapter;
-    private ArrayList<PropertyPost> itemsData;
+    private ArrayList<Property> itemsData;
 
     public ListFragment() {
         // Required empty public constructor
@@ -93,10 +97,10 @@ public class ListFragment extends Fragment {
                                     File localFile = File.createTempFile(documentId, "jpg");
                                     Log.d(TAG, Uri.fromFile(localFile).toString());
                                     propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
-                                        PropertyPost propertyPost = new PropertyPost(
+                                        Property propertyPost = new Property(
                                                 localFile,
                                                 document.getString("type"),
-                                                document.getDouble("price"),
+                                                Objects.requireNonNull(document.getDouble("price")),
                                                 document.getString("location"),
                                                 document.getString("owner"),
                                                 document.getString("info"),

@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.fragments;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,9 +11,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.LoadingDialog;
+import com.example.occupines.R;
+import com.example.occupines.adapters.UserAdapter;
+import com.example.occupines.models.Chat;
+import com.example.occupines.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -28,8 +34,8 @@ import java.util.Set;
 
 public class ThirdFragment extends Fragment {
 
+    //Setup global variables
     private static final String TAG = "ThirdFragment";
-    private static final String COLLECTION = "messages";
 
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
@@ -45,6 +51,7 @@ public class ThirdFragment extends Fragment {
         // Required empty public constructor
     }
 
+    //Instantiate objects
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,27 +79,41 @@ public class ThirdFragment extends Fragment {
         return view;
     }
 
+    //Gets chat messages from firestore
     private void getMessages() {
+        //Start loading animation
         loadingDialog.start();
+        //Remove all elements of usersList
         usersList.clear();
 
-        db.collection(COLLECTION)
+        //Get users that you have chat from messages collection from firestore
+        db.collection("messages")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+                        //Loop through the documents
                         for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                            //Get the chat data of a document
                             Chat chat = new Chat(
                                     document.getString("sender"),
                                     document.getString("receiver"),
                                     document.getString("message")
                             );
 
+                            //If the receiver of the message is the current user
+                            //Then add the message sender to usersList
                             if (chat.getReceiver().equals(currentUser.getUid())) {
                                 usersList.add(chat.getSender());
                             }
+                            //If the sender of the message is the current user
+                            //Then add the message receiver to usersList
                             if (chat.getSender().equals(currentUser.getUid())) {
                                 usersList.add(chat.getReceiver());
                             }
+                            /*  NOTE: usersList uses a Set interface
+                                      Set interface is an unordered collection or
+                                      list in which duplicates are not allowed   */
 
                             Log.d(TAG, "usersList: " + usersList.size());
                             getUserInfo();
@@ -103,38 +124,49 @@ public class ThirdFragment extends Fragment {
                 });
     }
 
+    //Gets user info from firestore
     private void getUserInfo() {
+        //Remove all elements of users
         users.clear();
 
+        //Get users info to show in recycler view
         db.collection("users").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                     if (document.exists()) {
+                        //Get id of new user
                         String userId = document.getId();
+                        //Get username of new user
                         String username = document.getString("username");
-
+                        //Path to profile picture of user
                         StorageReference profileImageRef = storageRef
                                 .child("images")
                                 .child(userId)
                                 .child("profile");
-
+                        //Get profile picture of new user
                         try {
                             File localFile = File.createTempFile(userId, "jpg");
                             Log.d(TAG, Uri.fromFile(localFile).toString());
                             profileImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
+                                //Save new user object
                                 User newUser = new User(userId, username, localFile);
+                                //Check if users is the same size as usersList
                                 if (users.size() != usersList.size()) {
+                                    //Loop through usersList and check if new user is in usersList
                                     for (String id : usersList) {
                                         if (newUser.getId().equals(id) && !users.contains(newUser)) {
+                                            //Add this new user in the recycler view
                                             users.add(newUser);
                                             Log.d(TAG, "users: " + users.size());
                                         }
                                     }
                                 }
-
+                                //Refresh userAdapter
                                 if (userAdapter != null) userAdapter.notifyDataSetChanged();
+                                //Stop loading animation
                                 loadingDialog.dismiss();
                             });
+                            //Delete temporary file
                             if (localFile.delete()) {
                                 Log.d(TAG, "Temp file deleted");
                             }
@@ -149,6 +181,7 @@ public class ThirdFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        //Set values to null to prevent memory leak
         userAdapter = null;
         recyclerView.setAdapter(null);
         super.onDestroyView();

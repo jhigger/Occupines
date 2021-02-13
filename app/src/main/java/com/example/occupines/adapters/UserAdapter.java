@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.adapters;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -11,6 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.ChatActivity;
+import com.example.occupines.R;
+import com.example.occupines.models.User;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 

@@ -1,11 +1,11 @@
-package com.example.occupines;
+package com.example.occupines.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.File;
 
-public class PropertyPost implements Parcelable {
+public class Property implements Parcelable {
 
     private File localFile;
     private String type;
@@ -15,7 +15,19 @@ public class PropertyPost implements Parcelable {
     private String info;
     private String id;
 
-    public PropertyPost(File localFile, String type, double price, String location, String owner, String info, String id) {
+    public static final Creator<Property> CREATOR = new Creator<Property>() {
+        @Override
+        public Property createFromParcel(Parcel in) {
+            return new Property(in);
+        }
+
+        @Override
+        public Property[] newArray(int size) {
+            return new Property[size];
+        }
+    };
+
+    public Property(File localFile, String type, double price, String location, String owner, String info, String id) {
         this.localFile = localFile;
         this.type = type;
         this.price = price;
@@ -25,19 +37,7 @@ public class PropertyPost implements Parcelable {
         this.id = id;
     }
 
-    public static final Creator<PropertyPost> CREATOR = new Creator<PropertyPost>() {
-        @Override
-        public PropertyPost createFromParcel(Parcel in) {
-            return new PropertyPost(in);
-        }
-
-        @Override
-        public PropertyPost[] newArray(int size) {
-            return new PropertyPost[size];
-        }
-    };
-
-    protected PropertyPost(Parcel in) {
+    protected Property(Parcel in) {
         type = in.readString();
         price = in.readDouble();
         location = in.readString();

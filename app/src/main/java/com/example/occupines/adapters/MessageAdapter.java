@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.R;
+import com.example.occupines.models.Chat;
+import com.example.occupines.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.NetworkPolicy;
@@ -65,8 +68,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (chats.get(position).getSender().equals(user.getUid())) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        assert currentUser != null;
+        if (chats.get(position).getSender().equals(currentUser.getUid())) {
             return MSG_TYPE_Right;
         } else {
             return MSG_TYPE_LEFT;
