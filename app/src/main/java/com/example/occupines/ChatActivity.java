@@ -165,6 +165,7 @@ public class ChatActivity extends AppCompatActivity {
         message.put("sender", sender);
         message.put("receiver", receiver);
         message.put("message", msg);
+        message.put("isSeen", false);
         message.put("createdAt", FieldValue.serverTimestamp());
 
         //Upload to firestore
@@ -184,6 +185,7 @@ public class ChatActivity extends AppCompatActivity {
                 .addSnapshotListener((value, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
+                        loadingDialog.dismiss();
                         return;
                     }
                     //Redraw on data change
@@ -192,19 +194,30 @@ public class ChatActivity extends AppCompatActivity {
                         Chat chat = new Chat(
                                 document.getString("sender"),
                                 document.getString("receiver"),
-                                document.getString("message")
-                        );
+                                document.getString("message"),
+                                Objects.requireNonNull(document.getBoolean("isSeen")));
+                        //Check if the current user is the receiver or sender of the message
                         if (chat.getReceiver().equals(myId) && chat.getSender().equals(userId) ||
                                 chat.getReceiver().equals(userId) && chat.getSender().equals(myId)) {
+                            //Show conversation in screen
                             chats.add(chat);
                             // 3. create an adapter
                             messageAdapter = new MessageAdapter(chats, user);
                             // 4. set adapter
                             recyclerView.setAdapter(messageAdapter);
                         }
-                        loadingDialog.dismiss();
+                        if (chat.getReceiver().equals(myId) && chat.getSender().equals(userId)) {
+                            seenMessage(document.getId());
+                        }
                     }
+                    loadingDialog.dismiss();
                 });
+    }
+
+    //Updates document field isSeen to true in messages document
+    private void seenMessage(String documentId) {
+        db.collection("messages").document(documentId)
+                .update("isSeen", true);
     }
 
     @Override

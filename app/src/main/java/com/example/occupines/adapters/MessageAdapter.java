@@ -59,6 +59,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                     .resize(500, 500)
                     .into(holder.profileImage);
         }
+
+        if (holder.seen != null) {
+            if (position == chats.size() - 1) {
+                if (chat.isSeen()) {
+                    holder.seen.setText(R.string.seen);
+                } else {
+                    holder.seen.setText(R.string.delivered);
+                }
+            } else {
+                holder.seen.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
@@ -81,11 +93,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         public final ImageView profileImage;
         public final TextView showMessage;
+        public final TextView seen;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             profileImage = itemView.findViewById(R.id.profileImage);
             showMessage = itemView.findViewById(R.id.showMessage);
+            seen = itemView.findViewById(R.id.seen);
         }
     }
 }

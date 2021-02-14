@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#21C3B8</color>
     <color name="secondary">#75BA01</color>
+    <color name="badge_color">#de3c47</color>
 </resources>

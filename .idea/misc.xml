@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="EntryPointsManager">
+    <pattern value="com.example.occupines.models.Chat" />
+    <pattern value="com.example.occupines.models.Chat" method="setMessage" />
+    <pattern value="com.example.occupines.models.Chat" method="setReceiver" />
+    <pattern value="com.example.occupines.models.Chat" method="setSeen" />
+    <pattern value="com.example.occupines.models.Chat" method="setSender" />
+    <pattern value="com.example.occupines.models.User" method="setId" />
+    <pattern value="com.example.occupines.models.User" method="setLocalFile" />
+    <pattern value="com.example.occupines.models.User" method="setUsername" />
+    <pattern value="com.example.occupines.models.User" />
+  </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="org.jetbrains.annotations.Nullable" />
     <option name="myDefaultNotNull" value="androidx.annotation.NonNull" />

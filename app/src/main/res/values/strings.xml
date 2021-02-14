@@ -83,4 +83,7 @@
     <string name="username">username</string>
     <string name="send">Send</string>
     <string name="type_your_message">Type your message…</string>
+    <string name="seen">Seen</string>
+    <string name="delivered">Delivered</string>
+    <string name="you_have_no_messages">You have no messages</string>
 </resources>
