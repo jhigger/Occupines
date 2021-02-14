@@ -87,4 +87,5 @@
     <string name="delivered">Delivered</string>
     <string name="you_have_no_messages">You have no messages</string>
     <string name="liked">Liked</string>
+    <string name="you_have_no_likes">You have no likes</string>
 </resources>
