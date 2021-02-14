@@ -113,10 +113,12 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                         DocumentSnapshot document = task.getResult();
                         assert document != null;
                         if (document.exists()) {
-                            if (Objects.requireNonNull(document.getBoolean(userId))) {
-                                likeButton.setText(R.string.liked);
-                            } else {
-                                likeButton.setText(R.string.like);
+                            if (document.getBoolean(userId) != null) {
+                                if (Objects.requireNonNull(document.getBoolean(userId))) {
+                                    likeButton.setText(R.string.liked);
+                                } else {
+                                    likeButton.setText(R.string.like);
+                                }
                             }
                         }
                     } else {
