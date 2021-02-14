@@ -1,6 +1,8 @@
 package com.example.occupines.adapters;
 
+import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +16,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.occupines.ChatActivity;
 import com.example.occupines.R;
+import com.example.occupines.Utility;
 import com.example.occupines.models.Property;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder> {
+    private static final String TAG = "MyListAdapter";
     private final ArrayList<Property> listData;
     private final String userId;
 
@@ -55,6 +67,8 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
         holder.owner.setText(myListData.getOwner());
         holder.info.setText(myListData.getInfo());
 
+        setLikeButton(myListData.getId(), holder.likeButton);
+
         if (myListData.getId().equals(userId)) {
             holder.messageButton.setVisibility(View.GONE);
             holder.likeButton.setVisibility(View.GONE);
@@ -65,8 +79,58 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                 holder.context.startActivity(intent);
             });
             holder.likeButton.setOnClickListener(v -> {
+                if (holder.likeButton.getText().toString().equals("Like")) {
+                    holder.likeButton.setText(R.string.liked);
+                    likePost(holder.context, myListData.getId(), true);
+                } else if (holder.likeButton.getText().toString().equals("Liked")) {
+                    holder.likeButton.setText(R.string.like);
+                    likePost(holder.context, myListData.getId(), false);
+                }
             });
         }
+    }
+
+    //Update document in likes collection
+    private void likePost(Context context, String propertyId, boolean bool) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        assert currentUser != null;
+        Map<String, Object> like = new HashMap<>();
+        like.put(currentUser.getUid(), bool);
+
+        db.collection("likes").document(propertyId)
+                .set(like, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Liked post"))
+                .addOnFailureListener(e -> {
+                    Utility.showToast(context, "Error: Like failed");
+                    Log.w(TAG, "Error writing document", e);
+                });
+    }
+
+    //Update document in likes collection
+    private void setLikeButton(String propertyId, TextView likeButton) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("likes").document(propertyId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        assert document != null;
+                        if (document.exists()) {
+                            assert currentUser != null;
+                            if (Objects.requireNonNull(document.getBoolean(currentUser.getUid()))) {
+                                likeButton.setText(R.string.liked);
+                            } else {
+                                likeButton.setText(R.string.like);
+                            }
+                        }
+                    } else {
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });
     }
 
     @Override
