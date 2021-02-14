@@ -18,8 +18,6 @@ import com.example.occupines.ChatActivity;
 import com.example.occupines.R;
 import com.example.occupines.Utility;
 import com.example.occupines.models.Property;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -35,11 +33,13 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
     private static final String TAG = "MyListAdapter";
     private final ArrayList<Property> listData;
     private final String userId;
+    private final FirebaseFirestore db;
 
     // RecyclerView recyclerView;
     public MyListAdapter(ArrayList<Property> listData, String userId) {
         this.listData = listData;
         this.userId = userId;
+        db = FirebaseFirestore.getInstance();
     }
 
     @NonNull
@@ -92,12 +92,8 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
 
     //Update document in likes collection
     private void likePost(Context context, String propertyId, boolean bool) {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        assert currentUser != null;
         Map<String, Object> like = new HashMap<>();
-        like.put(currentUser.getUid(), bool);
+        like.put(userId, bool);
 
         db.collection("likes").document(propertyId)
                 .set(like, SetOptions.merge())
@@ -110,9 +106,6 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
 
     //Update document in likes collection
     private void setLikeButton(String propertyId, TextView likeButton) {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         db.collection("likes").document(propertyId)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -120,8 +113,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                         DocumentSnapshot document = task.getResult();
                         assert document != null;
                         if (document.exists()) {
-                            assert currentUser != null;
-                            if (Objects.requireNonNull(document.getBoolean(currentUser.getUid()))) {
+                            if (Objects.requireNonNull(document.getBoolean(userId))) {
                                 likeButton.setText(R.string.liked);
                             } else {
                                 likeButton.setText(R.string.like);
