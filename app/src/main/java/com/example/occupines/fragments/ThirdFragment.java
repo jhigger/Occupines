@@ -111,25 +111,27 @@ public class ThirdFragment extends Fragment {
                     //Loop through the documents
                     for (QueryDocumentSnapshot document : Objects.requireNonNull(value)) {
                         //Get the chat data of a document
-                        Chat chat = new Chat(
-                                document.getString("sender"),
-                                document.getString("receiver"),
-                                document.getString("message"),
-                                Objects.requireNonNull(document.getBoolean("isSeen")));
+                        if (document.getBoolean("isSeen") != null) {
+                            Chat chat = new Chat(
+                                    document.getString("sender"),
+                                    document.getString("receiver"),
+                                    document.getString("message"),
+                                    document.getBoolean("isSeen"));
 
-                        //If the receiver of the message is the current user
-                        //Then add the message sender to usersList
-                        if (chat.getReceiver().equals(currentUser.getUid())) {
-                            usersList.add(chat.getSender());
-                        }
-                        //If the sender of the message is the current user
-                        //Then add the message receiver to usersList
-                        if (chat.getSender().equals(currentUser.getUid())) {
-                            usersList.add(chat.getReceiver());
-                        }
+                            //If the receiver of the message is the current user
+                            //Then add the message sender to usersList
+                            if (chat.getReceiver().equals(currentUser.getUid())) {
+                                usersList.add(chat.getSender());
+                            }
+                            //If the sender of the message is the current user
+                            //Then add the message receiver to usersList
+                            if (chat.getSender().equals(currentUser.getUid())) {
+                                usersList.add(chat.getReceiver());
+                            }
                             /*  NOTE: usersList uses a Set interface
                                       Set interface is an unordered collection or
                                       list in which duplicates are not allowed   */
+                        }
                     }
                     Log.d(TAG, "usersList: " + usersList.size());
                     //Tell current user if current user has no messages

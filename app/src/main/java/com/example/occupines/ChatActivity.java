@@ -191,23 +191,26 @@ public class ChatActivity extends AppCompatActivity {
                     //Redraw on data change
                     chats.clear();
                     for (QueryDocumentSnapshot document : Objects.requireNonNull(value)) {
-                        Chat chat = new Chat(
-                                document.getString("sender"),
-                                document.getString("receiver"),
-                                document.getString("message"),
-                                Objects.requireNonNull(document.getBoolean("isSeen")));
-                        //Check if the current user is the receiver or sender of the message
-                        if (chat.getReceiver().equals(myId) && chat.getSender().equals(userId) ||
-                                chat.getReceiver().equals(userId) && chat.getSender().equals(myId)) {
-                            //Show conversation in screen
-                            chats.add(chat);
-                            // 3. create an adapter
-                            messageAdapter = new MessageAdapter(chats, user);
-                            // 4. set adapter
-                            recyclerView.setAdapter(messageAdapter);
-                        }
-                        if (chat.getReceiver().equals(myId) && chat.getSender().equals(userId)) {
-                            seenMessage(document.getId());
+                        if (document.getBoolean("isSeen") != null) {
+                            Chat chat = new Chat(
+                                    document.getString("sender"),
+                                    document.getString("receiver"),
+                                    document.getString("message"),
+                                    document.getBoolean("isSeen"));
+
+                            //Check if the current user is the receiver or sender of the message
+                            if (chat.getReceiver().equals(myId) && chat.getSender().equals(userId) ||
+                                    chat.getReceiver().equals(userId) && chat.getSender().equals(myId)) {
+                                //Show conversation in screen
+                                chats.add(chat);
+                                // 3. create an adapter
+                                messageAdapter = new MessageAdapter(chats, user);
+                                // 4. set adapter
+                                recyclerView.setAdapter(messageAdapter);
+                            }
+                            if (chat.getReceiver().equals(myId) && chat.getSender().equals(userId)) {
+                                seenMessage(document.getId());
+                            }
                         }
                     }
                     loadingDialog.dismiss();

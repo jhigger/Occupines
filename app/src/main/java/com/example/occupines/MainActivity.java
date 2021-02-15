@@ -124,12 +124,14 @@ public class MainActivity extends AppCompatActivity {
                     for (QueryDocumentSnapshot document : Objects.requireNonNull(value)) {
                         //Get the chat data of a document
                         String receiver = document.getString("receiver");
-                        boolean isSeen = Objects.requireNonNull(document.getBoolean("isSeen"));
-                        //If the receiver of the message is the current user and the message is not read yet
-                        //Then increment notification count
-                        assert receiver != null;
-                        if (receiver.equals(currentUser.getUid()) && !isSeen) {
-                            count++;
+                        if (document.getBoolean("isSeen") != null) {
+                            boolean isSeen = document.getBoolean("isSeen");
+                            //If the receiver of the message is the current user and the message is not read yet
+                            //Then increment notification count
+                            assert receiver != null;
+                            if (receiver.equals(currentUser.getUid()) && !isSeen) {
+                                count++;
+                            }
                         }
                     }
                     Log.d(TAG, "Notification count: " + count);
