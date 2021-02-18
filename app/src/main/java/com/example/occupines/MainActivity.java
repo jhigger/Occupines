@@ -61,9 +61,6 @@ public class MainActivity extends AppCompatActivity {
         FourthFragment fourthFragment = new FourthFragment();
         FifthFragment fifthFragment = new FifthFragment();
 
-        //Download profile image then load first fragment
-        downloadImage().addOnCompleteListener(v -> setCurrentFragment(firstFragment));
-
         //Get bottomNav reference
         BottomNavigationView bottomNav = binding.bottomNavigationView;
         //Add badge on notification for messages
@@ -107,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        //Download profile image then load first fragment
+        downloadImage().addOnCompleteListener(v -> setCurrentFragment(firstFragment));
     }
 
     //Gets number of unopened chat
