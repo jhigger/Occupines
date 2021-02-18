@@ -13,15 +13,8 @@
         android:layout_margin="8dp"
         android:gravity="center"
         android:textColor="@color/black"
+        android:background="@drawable/event_bg"
         android:textSize="16sp"
         tools:text="26" />
-
-    <View
-        android:id="@+id/dotView"
-        android:layout_width="4.5dp"
-        android:layout_height="4.5dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="10dp"
-        android:background="@color/badge_color" />
 
 </FrameLayout>

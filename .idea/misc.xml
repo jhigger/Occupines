@@ -10,6 +10,9 @@
     <pattern value="com.example.occupines.models.User" method="setLocalFile" />
     <pattern value="com.example.occupines.models.User" method="setUsername" />
     <pattern value="com.example.occupines.models.User" />
+    <writeAnnotations>
+      <writeAnnotation name="android.annotation.SuppressLint" />
+    </writeAnnotations>
   </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="org.jetbrains.annotations.Nullable" />

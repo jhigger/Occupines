@@ -11,13 +11,11 @@ import com.kizitonwose.calendarview.ui.ViewContainer;
 public class DayViewContainer extends ViewContainer {
 
     private final TextView textView;
-    private final View dotView;
     private CalendarDay day;
 
     public DayViewContainer(View view) {
         super(view);
         this.textView = view.findViewById(R.id.calendarDayText);
-        this.dotView = view.findViewById(R.id.dotView);
 
         view.setOnClickListener(v -> {
             if (day.getOwner() == DayOwner.THIS_MONTH) {
@@ -28,10 +26,6 @@ public class DayViewContainer extends ViewContainer {
 
     public TextView getTextView() {
         return textView;
-    }
-
-    public View getDotView() {
-        return dotView;
     }
 
     public void setDay(CalendarDay day) {
