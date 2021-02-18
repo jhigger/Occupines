@@ -88,4 +88,5 @@
     <string name="you_have_no_messages">You have no messages</string>
     <string name="liked">Liked</string>
     <string name="you_have_no_likes">You have no likes</string>
+    <string name="add_event_button">Add event button</string>
 </resources>
