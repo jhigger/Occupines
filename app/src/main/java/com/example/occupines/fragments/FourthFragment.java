@@ -1,11 +1,11 @@
 package com.example.occupines.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -20,12 +21,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.occupines.DayViewContainer;
+import com.example.occupines.LoadingDialog;
 import com.example.occupines.MonthViewContainer;
 import com.example.occupines.R;
 import com.example.occupines.Utility;
 import com.example.occupines.adapters.EventAdapter;
 import com.example.occupines.models.Event;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.kizitonwose.calendarview.CalendarView;
 import com.kizitonwose.calendarview.model.CalendarDay;
 import com.kizitonwose.calendarview.model.CalendarMonth;
@@ -38,10 +46,16 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class FourthFragment extends Fragment {
 
+    private static final String TAG = "FourthFragment";
     private static final DateTimeFormatter selectionFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
     public static LocalDate selectedDate = null;
 
@@ -50,9 +64,16 @@ public class FourthFragment extends Fragment {
     @SuppressLint("StaticFieldLeak")
     private static TextView selectedDateText;
 
+    private static FirebaseUser currentUser;
+    @SuppressLint("StaticFieldLeak")
+    private static FirebaseFirestore db;
+    @SuppressLint("StaticFieldLeak")
+    private static LoadingDialog loadingDialog;
+
     private RecyclerView recyclerView;
-    private EventAdapter eventAdapter;
-    private List<Event> events;
+    private static EventAdapter eventAdapter;
+    private static Set<Event> calendarEvents;
+    private static List<Event> events;
 
     public FourthFragment() {
         // Required empty public constructor
@@ -73,7 +94,7 @@ public class FourthFragment extends Fragment {
             // Reload the newly selected date so the dayBinder is
             // called and we can ADD the selection background.
             calendarView.notifyDateChanged(date);
-            selectedDateText.setText(selectionFormatter.format(date));
+            updateAdapterForDate(date);
             if (currentSelection != null) {
                 // We need to also reload the previously selected
                 // date so we can REMOVE the selection background.
@@ -82,9 +103,94 @@ public class FourthFragment extends Fragment {
         }
     }
 
+    public static void updateAdapterForDate(LocalDate date) {
+        getEvents(date);
+        eventAdapter.notifyDataSetChanged();
+        selectedDateText.setText(selectionFormatter.format(date));
+    }
+
+    private static void getEvents(LocalDate date) {
+        events.clear();
+
+        db.collection("events")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                            if (document.exists()) {
+                                //Get the event data of a document
+                                Event event = new Event(
+                                        document.getId(),
+                                        document.getString("userId"),
+                                        document.getString("text"),
+                                        LocalDate.parse(document.getString("date")));
+
+                                if (event.getUserId().equals(currentUser.getUid())) {
+                                    if (event.getDate().equals(date)) {
+                                        if (!events.contains(event)) {
+                                            events.add(event);
+                                            calendarEvents.add(event);
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        }
+                        calendarView.notifyDateChanged(date);
+                        if (eventAdapter != null) eventAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });
+    }
+
+    private static void getEvents() {
+        //Start loading animation
+        loadingDialog.start();
+
+        db.collection("events")
+                .orderBy("date", Query.Direction.DESCENDING)
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        loadingDialog.dismiss();
+                        return;
+                    }
+                    //Redraw on data change
+                    calendarEvents.clear();
+                    for (QueryDocumentSnapshot document : Objects.requireNonNull(value)) {
+                        if (document.exists()) {
+                            //Get the event data of a document
+                            Event event = new Event(
+                                    document.getId(),
+                                    document.getString("userId"),
+                                    document.getString("text"),
+                                    LocalDate.parse(document.getString("date")));
+
+                            if (event.getUserId().equals(currentUser.getUid())) {
+                                calendarEvents.add(event);
+                            }
+                        } else {
+                            Log.d(TAG, "No such document");
+                        }
+                    }
+                    calendarView.notifyCalendarChanged();
+                    loadingDialog.dismiss();
+                });
+    }
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        db = FirebaseFirestore.getInstance();
+        loadingDialog = new LoadingDialog(getActivity());
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_fourth, container, false);
 
@@ -94,7 +200,7 @@ public class FourthFragment extends Fragment {
         selectedDateText = view.findViewById(R.id.selectedDateText);
 
         YearMonth currentMonth = YearMonth.now();
-        YearMonth firstMonth = currentMonth.minusMonths(10);
+        YearMonth firstMonth = currentMonth.plusMonths(10);
         YearMonth lastMonth = currentMonth.plusMonths(10);
         DayOfWeek firstDayOfWeek = DayOfWeek.SUNDAY;
         calendarView.setup(firstMonth, lastMonth, firstDayOfWeek);
@@ -173,9 +279,8 @@ public class FourthFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // this is data for recycler view
         events = new ArrayList<>();
-
-//        getEvents();
-
+        calendarEvents = new LinkedHashSet<>();
+        getEvents();
         // 3. create an adapter
         eventAdapter = new EventAdapter(events);
         // 4. set adapter
@@ -185,16 +290,14 @@ public class FourthFragment extends Fragment {
     }
 
     private void inputDialog() {
-        Activity activity = (Activity) getContext();
-        final EditText input = new EditText(activity);
+        final EditText input = new EditText(getContext());
 
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
                     if (!input.getText().toString().trim().isEmpty()) {
-                        addEvent(input.getText().toString());
-                        Utility.showToast(getContext(), "Event added");
+                        addEvent(new Event(currentUser.getUid(), input.getText().toString(), selectedDate));
                     } else {
                         Utility.showToast(getContext(), "Field is empty");
                     }
@@ -206,8 +309,7 @@ public class FourthFragment extends Fragment {
             }
         };
 
-        assert activity != null;
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
         builder.setView(input);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
         builder.setMessage("Add event").setPositiveButton("Save", dialogClickListener)
@@ -215,11 +317,39 @@ public class FourthFragment extends Fragment {
 
     }
 
-    private void addEvent(String text) {
-        events.add(new Event(text, selectedDate));
+    private void addEvent(Event event) {
+        loadingDialog.start();
+
+        Map<String, Object> eventMap = new HashMap<>();
+        eventMap.put("userId", currentUser.getUid());
+        eventMap.put("text", event.getText());
+        eventMap.put("date", event.getDate().toString());
+        eventMap.put("createdAt", FieldValue.serverTimestamp());
+
+        db.collection("events").document()
+                .set(eventMap)
+                .addOnCompleteListener(task -> loadingDialog.dismiss())
+                .addOnSuccessListener(aVoid -> {
+                    events.add(event);
+                    calendarView.notifyDateChanged(event.getDate());
+                    eventAdapter.notifyDataSetChanged();
+                    Utility.showToast(getContext(), "Event Added");
+                })
+                .addOnFailureListener(e -> {
+                    Utility.showToast(getContext(), "Error: Submission failed");
+                    Log.w(TAG, "Error writing document", e);
+                });
     }
 
     private boolean containsDate(LocalDate date) {
-        return events.stream().anyMatch(o -> o.getDate().equals(date));
+        return calendarEvents.stream().anyMatch(o -> o.getDate().equals(date));
+    }
+
+    @Override
+    public void onDestroy() {
+        //Set values to null to prevent memory leak
+        eventAdapter = null;
+        recyclerView.setAdapter(null);
+        super.onDestroy();
     }
 }

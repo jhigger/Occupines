@@ -6,11 +6,25 @@ public class Event {
 
     private final LocalDate date;
     private String id;
+
+    private String userId;
     private String text;
 
-    public Event(String text, LocalDate date) {
+    public Event(String id, String userId, String text, LocalDate date) {
+        this.id = id;
+        this.userId = userId;
         this.text = text;
         this.date = date;
+    }
+
+    public Event(String userId, String text, LocalDate date) {
+        this.userId = userId;
+        this.text = text;
+        this.date = date;
+    }
+
+    public LocalDate getDate() {
+        return date;
     }
 
     public String getText() {
@@ -21,15 +35,15 @@ public class Event {
         this.text = text;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public LocalDate getDate() {
-        return date;
     }
 }

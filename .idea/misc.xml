@@ -10,6 +10,10 @@
     <pattern value="com.example.occupines.models.User" method="setLocalFile" />
     <pattern value="com.example.occupines.models.User" method="setUsername" />
     <pattern value="com.example.occupines.models.User" />
+    <pattern value="com.example.occupines.models.Event" />
+    <pattern value="com.example.occupines.models.Event" method="getUserId" />
+    <pattern value="com.example.occupines.models.Event" method="setText" />
+    <pattern value="com.example.occupines.models.Event" method="setUserId" />
     <writeAnnotations>
       <writeAnnotation name="android.annotation.SuppressLint" />
     </writeAnnotations>
