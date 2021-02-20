@@ -37,6 +37,15 @@ public class Property implements Parcelable {
         this.id = id;
     }
 
+    public Property(String type, double price, String location, String owner, String info, String id) {
+        this.type = type;
+        this.price = price;
+        this.location = location;
+        this.owner = owner;
+        this.info = info;
+        this.id = id;
+    }
+
     protected Property(Parcel in) {
         type = in.readString();
         price = in.readDouble();
