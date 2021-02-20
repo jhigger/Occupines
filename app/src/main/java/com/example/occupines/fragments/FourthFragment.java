@@ -200,7 +200,7 @@ public class FourthFragment extends Fragment {
         selectedDateText = view.findViewById(R.id.selectedDateText);
 
         YearMonth currentMonth = YearMonth.now();
-        YearMonth firstMonth = currentMonth.plusMonths(10);
+        YearMonth firstMonth = currentMonth.minusMonths(10);
         YearMonth lastMonth = currentMonth.plusMonths(10);
         DayOfWeek firstDayOfWeek = DayOfWeek.SUNDAY;
         calendarView.setup(firstMonth, lastMonth, firstDayOfWeek);
