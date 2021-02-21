@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     public static File localFile;
+    private BottomNavigationView bottomNav;
 
     //MainActivity starts here
     @Override
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         FifthFragment fifthFragment = new FifthFragment();
 
         //Get bottomNav reference
-        BottomNavigationView bottomNav = binding.bottomNavigationView;
+        bottomNav = binding.bottomNavigationView;
         //Add badge on notification for messages
         BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.messages);
         //Number of notifications
@@ -106,8 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 //5th page
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                         && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
-                    return false;
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
                 } else {
                     setCurrentFragment(fifthFragment);
                 }
@@ -126,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 101) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setCurrentFragment(new FifthFragment());
+            } else {
+                bottomNav.setSelectedItemId(R.id.home);
             }
         }
     }
