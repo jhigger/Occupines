@@ -60,6 +60,8 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
     private FirebaseFirestore db;
     private LoadingDialog loadingDialog;
 
+    private Button showRentals;
+
     public FifthFragment() {
     }
 
@@ -109,7 +111,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        Button showRentals = view.findViewById(R.id.b_show);
+        showRentals = view.findViewById(R.id.b_show);
         showRentals.setOnClickListener(v -> {
             Object[] dataTransfer = new Object[2];
             GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
@@ -245,6 +247,11 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
             marker.showInfoWindow();
             return true;
         });
+
+        //Zoom controls
+        map.getUiSettings().setZoomControlsEnabled(true);
+        //Add bottom padding to give space for button
+        map.setPadding(0, 0, 0, showRentals.getHeight());
 
         //Show current location
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
