@@ -46,7 +46,8 @@ import java.util.Objects;
 public class FifthFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "FifthFragment";
-    private static final int REQUEST_CODE = 101;
+    private static final int REQUEST_CODE = 411;
+
     final int PROXIMITY_RADIUS = 10000;
     GoogleMap map;
     SupportMapFragment mapFragment;
@@ -62,20 +63,20 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
     public FifthFragment() {
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         geocoder = new Geocoder(getContext(), Locale.getDefault());
         db = FirebaseFirestore.getInstance();
         loadingDialog = new LoadingDialog(getActivity());
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
+        fetchLastLocation();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_fifth, container, false);
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
-        fetchLastLocation();
 
         searchView = view.findViewById(R.id.sv_location);
 
@@ -167,7 +168,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
                         //Show whole Baguio City
                         LatLng latLng = new LatLng(16.402148394057043, 120.59555516012183);
                         map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12)); //could be 2 - 21
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.75f)); //could be 2 - 21
                         Utility.showToast(getContext(), "Showing nearby rentals");
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
@@ -177,26 +178,27 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void fetchLastLocation() {
-        if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()), new String[]
-                    {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
-            return;
-        }
-        Task<Location> getLastLocation = fusedLocationProviderClient.getLastLocation();
+        if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+        } else {
+            Task<Location> getLastLocation = fusedLocationProviderClient.getLastLocation();
 
-        getLastLocation.addOnSuccessListener(location -> {
-            if (location != null) {
-                currentLocation = location;
-                Utility.showToast(getContext(), currentLocation.getLatitude()
-                        + " " + currentLocation.getLongitude());
-                assert getFragmentManager() != null;
-                // Getting reference to the SupportMapFragment
-                mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.google_map);
-                assert mapFragment != null;
-                // Getting GoogleMap object from the fragment
-                mapFragment.getMapAsync(FifthFragment.this);
-            }
-        });
+            getLastLocation.addOnSuccessListener(location -> {
+                if (location != null) {
+                    currentLocation = location;
+                    Utility.showToast(getContext(), currentLocation.getLatitude()
+                            + " " + currentLocation.getLongitude());
+                    assert getFragmentManager() != null;
+                    // Getting reference to the SupportMapFragment
+                    mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.google_map);
+                    assert mapFragment != null;
+                    // Getting GoogleMap object from the fragment
+
+                    mapFragment.getMapAsync(this);
+                }
+            });
+        }
     }
 
     @Override
@@ -234,6 +236,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         //Set map view to display a mixture of normal and satellite views
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
+        //Zoom to marker
         map.setOnMarkerClickListener(marker -> {
             map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 18));
@@ -245,10 +248,13 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18)); //could be 2 - 21
+        map.addMarker(new MarkerOptions().position(latLng).title("You are here")).showInfoWindow();
+
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 fetchLastLocation();

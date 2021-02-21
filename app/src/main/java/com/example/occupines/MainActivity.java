@@ -1,9 +1,13 @@
 package com.example.occupines;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.MutableLiveData;
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Setup global variables
     private static final String TAG = "MainActivity";
+    private static final int REQUEST_CODE = 101;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -99,7 +104,13 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.location) {
                 //5th page
-                setCurrentFragment(fifthFragment);
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+                    return false;
+                } else {
+                    setCurrentFragment(fifthFragment);
+                }
                 return true;
             }
             return false;
@@ -107,6 +118,16 @@ public class MainActivity extends AppCompatActivity {
 
         //Download profile image then load first fragment
         downloadImage().addOnCompleteListener(v -> setCurrentFragment(firstFragment));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 101) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setCurrentFragment(new FifthFragment());
+            }
+        }
     }
 
     //Gets number of unopened chat
@@ -125,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                         //Get the chat data of a document
                         String receiver = document.getString("receiver");
                         if (document.getBoolean("isSeen") != null) {
-                            boolean isSeen = document.getBoolean("isSeen");
+                            boolean isSeen = Objects.requireNonNull(document.getBoolean("isSeen"));
                             //If the receiver of the message is the current user and the message is not read yet
                             //Then increment notification count
                             assert receiver != null;
@@ -180,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
     private void setCurrentFragment(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         //Clear fragment stack
-        fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fm.popBackStack(fragment.getTag(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
         //Replace current fragment
         fm.beginTransaction()
                 .replace(R.id.flFragment, fragment)
