@@ -94,7 +94,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
                 if (geoResults != null && geoResults.size() > 0) {
                     Address address = geoResults.get(0);
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
                 } else {
                     Utility.showToast(getContext(), "Place not found");
                 }
@@ -164,6 +164,10 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
                                 Log.d(TAG, "No such document");
                             }
                         }
+                        //Show whole Baguio City
+                        LatLng latLng = new LatLng(16.402148394057043, 120.59555516012183);
+                        map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12)); //could be 2 - 21
                         Utility.showToast(getContext(), "Showing nearby rentals");
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
@@ -227,10 +231,20 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         //set zoom to level to current so that you won't be able to zoom out viz. move outside bounds
         map.setMinZoomPreference(map.getCameraPosition().zoom);
 
-        //Show whole Baguio City
-        LatLng latLng = new LatLng(16.402148394057043, 120.59555516012183);
+        //Set map view to display a mixture of normal and satellite views
+        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        map.setOnMarkerClickListener(marker -> {
+            map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 18));
+            marker.showInfoWindow();
+            return true;
+        });
+
+        //Show current location
+        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.75f)); //could be 2 - 21
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18)); //could be 2 - 21
     }
 
     @Override
