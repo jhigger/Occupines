@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,24 +16,28 @@ import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.example.occupines.GetNearbyPlacesData;
+import com.example.occupines.GetNearbyPlaces;
 import com.example.occupines.LoadingDialog;
 import com.example.occupines.R;
 import com.example.occupines.Utility;
 import com.example.occupines.models.Property;
-import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -43,7 +48,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class FifthFragment extends Fragment implements OnMapReadyCallback {
+import static com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+
+public class FifthFragment extends Fragment implements OnMapReadyCallback,
+        ConnectionCallbacks,
+        OnConnectionFailedListener,
+        LocationListener {
 
     private static final String TAG = "FifthFragment";
     private static final int REQUEST_CODE = 101;
@@ -53,18 +64,17 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
     SupportMapFragment mapFragment;
     SearchView searchView;
     Geocoder geocoder;
-    Location currentLocation;
-    FusedLocationProviderClient fusedLocationProviderClient;
     double latitude, longitude;
 
     private FirebaseFirestore db;
     private LoadingDialog loadingDialog;
 
     private Button showRentals;
+    private GoogleApiClient googleApiClient;
+    private Marker currentUserLocationMarker;
 
     public FifthFragment() {
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,13 +82,22 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         geocoder = new Geocoder(getContext(), Locale.getDefault());
         db = FirebaseFirestore.getInstance();
         loadingDialog = new LoadingDialog(getActivity());
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(Objects.requireNonNull(getActivity()));
-        fetchLastLocation();
+        currentUserLocationMarker = null;
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_fifth, container, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkUserLocationPermission();
+        }
+
+        // Getting reference to the SupportMapFragment
+        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.google_map);
+        // Getting GoogleMap object from the fragment
+        assert mapFragment != null;
+        mapFragment.getMapAsync(this);
 
         searchView = view.findViewById(R.id.sv_location);
 
@@ -86,7 +105,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 String location = searchView.getQuery().toString();
-                List<Address> geoResults = null;
+                List<Address> geoResults = new ArrayList<>();
 
                 try {
                     geoResults = geocoder.getFromLocationName(location, 1);
@@ -97,7 +116,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
                 if (geoResults != null && geoResults.size() > 0) {
                     Address address = geoResults.get(0);
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                 } else {
                     Utility.showToast(getContext(), "Place not found");
                 }
@@ -113,15 +132,15 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
 
         showRentals = view.findViewById(R.id.b_show);
         showRentals.setOnClickListener(v -> {
-            Object[] dataTransfer = new Object[2];
-            GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
+            String apartment = "apartment";
+            Object[] transferData = new Object[2];
+            GetNearbyPlaces getNearbyPlaces = new GetNearbyPlaces();
 
-            String hospital = "apartment";
-            String url = getUrl(latitude, longitude, hospital);
-            dataTransfer[0] = map;
-            dataTransfer[1] = url;
-
-            getNearbyPlacesData.execute(dataTransfer);
+            String url = getUrl(latitude, longitude, apartment);
+            transferData[0] = map;
+            transferData[1] = url;
+            getNearbyPlaces.execute(transferData);
+            Utility.showToast(getContext(), "Searching for nearby Apartments");
 
             getDocuments();
         });
@@ -131,6 +150,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
 
     private void getDocuments() {
         loadingDialog.start();
+        map.clear();
 
         db.collection("properties")
                 .orderBy("createdAt", Query.Direction.ASCENDING)
@@ -181,33 +201,14 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
                 });
     }
 
-    private void fetchLastLocation() {
-        if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
-        } else {
-            Task<Location> getLastLocation = fusedLocationProviderClient.getLastLocation();
-
-            getLastLocation.addOnSuccessListener(location -> {
-                if (location != null) {
-                    currentLocation = location;
-                    Utility.showToast(getContext(), currentLocation.getLatitude()
-                            + " " + currentLocation.getLongitude());
-                    assert getFragmentManager() != null;
-                    // Getting reference to the SupportMapFragment
-                    mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.google_map);
-                    assert mapFragment != null;
-                    // Getting GoogleMap object from the fragment
-
-                    mapFragment.getMapAsync(this);
-                }
-            });
-        }
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+
+        if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            buildGoogleApiClient();
+            map.setMyLocationEnabled(true);
+        }
 
         //get lat long for corners for specified place
         LatLng one = new LatLng(16.3833911236084, 120.57546615600587);
@@ -240,7 +241,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         //Set map view to display a mixture of normal and satellite views
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
-        //Zoom to marker
+        //Zoom to marker on click
         map.setOnMarkerClickListener(marker -> {
             map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 18));
@@ -251,14 +252,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         //Zoom controls
         map.getUiSettings().setZoomControlsEnabled(true);
         //Add bottom padding to give space for button
-        map.setPadding(0, 0, 0, showRentals.getHeight());
-
-        //Show current location
-        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18)); //could be 2 - 21
-        map.addMarker(new MarkerOptions().position(latLng).title("You are here")).showInfoWindow();
-
+        map.setPadding(0, searchView.getHeight(), 0, showRentals.getHeight());
     }
 
     @Override
@@ -266,13 +260,19 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                fetchLastLocation();
+                if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (googleApiClient == null) {
+                        buildGoogleApiClient();
+                    }
+                    map.setMyLocationEnabled(true);
+                }
+            } else {
+                Utility.showToast(getContext(), "Permission Denied...");
             }
         }
     }
 
     private String getUrl(double latitude, double longitude, String nearbyPlace) {
-
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         googlePlaceUrl.append("location=").append(latitude).append(",").append(longitude);
         googlePlaceUrl.append("&radius=").append(PROXIMITY_RADIUS);
@@ -283,5 +283,63 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "url = " + googlePlaceUrl.toString());
 
         return googlePlaceUrl.toString();
+    }
+
+    public void checkUserLocationPermission() {
+        if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+        }
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        googleApiClient = new GoogleApiClient.Builder(Objects.requireNonNull(getContext()))
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        googleApiClient.connect();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(1100);
+        locationRequest.setFastestInterval(1100);
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        }
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
+        if (currentUserLocationMarker != null) {
+            currentUserLocationMarker.remove();
+        }
+
+        //Show current location
+        LatLng latLng = new LatLng(latitude, longitude);
+        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        map.animateCamera(CameraUpdateFactory.zoomBy(18));
+        map.addMarker(new MarkerOptions().position(latLng).title("Current location")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))).showInfoWindow();
+
+        if (googleApiClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }

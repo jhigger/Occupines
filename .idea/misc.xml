@@ -4,6 +4,7 @@
     <entry_points version="2.0">
       <entry_point TYPE="field" FQNAME="com.example.occupines.fragments.FifthFragment latitude" />
       <entry_point TYPE="field" FQNAME="com.example.occupines.fragments.FifthFragment longitude" />
+      <entry_point TYPE="field" FQNAME="com.example.occupines.fragments.FifthFragment fusedLocationProviderClient" />
     </entry_points>
     <pattern value="com.example.occupines.models.Chat" />
     <pattern value="com.example.occupines.models.Chat" method="setMessage" />

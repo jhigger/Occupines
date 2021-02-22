@@ -25,4 +25,9 @@
         <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
         <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
     </style>
+
+    <style name="Widget.MyApp.AutoCompleteTextView.SearchView" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:textColor">#000</item>
+        <item name="android:textColorHint">#5000</item>
+    </style>
 </resources>
