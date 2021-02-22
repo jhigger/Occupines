@@ -269,7 +269,6 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
             userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
             map.addMarker(userMarkerOptions).showInfoWindow();
             map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            map.animateCamera(CameraUpdateFactory.zoomBy(14));
 
             if (googleApiClient != null) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
@@ -358,7 +357,6 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
         userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         map.addMarker(userMarkerOptions).showInfoWindow();
         map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.animateCamera(CameraUpdateFactory.zoomBy(14));
 
         if (googleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
