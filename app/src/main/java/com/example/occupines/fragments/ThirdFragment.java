@@ -74,7 +74,6 @@ public class ThirdFragment extends Fragment {
         noMessage = view.findViewById(R.id.noMessage);
         // 1. get a reference to recyclerView
         recyclerView = view.findViewById(R.id.messagesRecyclerView);
-        recyclerView.setHasFixedSize(true);
         // 2. set layoutManger
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // this is data for recycler view

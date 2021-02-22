@@ -274,7 +274,6 @@ public class FourthFragment extends Fragment {
     private void setupRecyclerView(View view) {
         // 1. get a reference to recyclerView
         recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
         // 2. set layoutManger
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // this is data for recycler view
