@@ -19,8 +19,7 @@
         android:background="@drawable/edit_text_style"
         android:elevation="5dp"
         android:iconifiedByDefault="false"
-        android:queryHint="Search..."
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+        android:queryHint="Search..." />
 
     <Button
         android:id="@+id/b_show"
