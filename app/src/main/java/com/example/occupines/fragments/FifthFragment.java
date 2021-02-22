@@ -116,6 +116,12 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
                 if (geoResults != null && geoResults.size() > 0) {
                     Address address = geoResults.get(0);
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+                    MarkerOptions userMarkerOptions = new MarkerOptions();
+                    userMarkerOptions.position(latLng);
+                    userMarkerOptions.title(location);
+                    userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                    map.addMarker(userMarkerOptions).showInfoWindow();
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
                 } else {
                     Utility.showToast(getContext(), "Place not found");
@@ -238,14 +244,37 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
         //set zoom to level to current so that you won't be able to zoom out viz. move outside bounds
         map.setMinZoomPreference(map.getCameraPosition().zoom);
 
-        //Set map view to display a mixture of normal and satellite views
-        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        //Set map view to display a normal view
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         //Zoom to marker on click
         map.setOnMarkerClickListener(marker -> {
             map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 18));
             marker.showInfoWindow();
+            return true;
+        });
+
+        //Goto current loc
+        map.setOnMyLocationButtonClickListener(() -> {
+            if (currentUserLocationMarker != null) {
+                currentUserLocationMarker.remove();
+            }
+
+            //Show current location
+            LatLng latLng = new LatLng(latitude, longitude);
+            MarkerOptions userMarkerOptions = new MarkerOptions();
+            userMarkerOptions.position(latLng);
+            userMarkerOptions.title("Current Location");
+            userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            map.addMarker(userMarkerOptions).showInfoWindow();
+            map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            map.animateCamera(CameraUpdateFactory.zoomBy(14));
+
+            if (googleApiClient != null) {
+                LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+            }
+
             return true;
         });
 
@@ -323,10 +352,13 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
 
         //Show current location
         LatLng latLng = new LatLng(latitude, longitude);
+        MarkerOptions userMarkerOptions = new MarkerOptions();
+        userMarkerOptions.position(latLng);
+        userMarkerOptions.title("Current Location");
+        userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        map.addMarker(userMarkerOptions).showInfoWindow();
         map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.animateCamera(CameraUpdateFactory.zoomBy(18));
-        map.addMarker(new MarkerOptions().position(latLng).title("Current location")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))).showInfoWindow();
+        map.animateCamera(CameraUpdateFactory.zoomBy(14));
 
         if (googleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
