@@ -116,7 +116,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
                 if (geoResults != null && geoResults.size() > 0) {
                     Address address = geoResults.get(0);
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
                 } else {
                     Utility.showToast(getContext(), "Place not found");
                 }
