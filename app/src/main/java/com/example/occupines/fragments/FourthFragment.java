@@ -332,6 +332,7 @@ public class FourthFragment extends Fragment {
                     events.add(event);
                     calendarView.notifyDateChanged(event.getDate());
                     eventAdapter.notifyDataSetChanged();
+                    updateAdapterForDate(event.getDate());
                     Utility.showToast(getContext(), "Event Added");
                 })
                 .addOnFailureListener(e -> {
