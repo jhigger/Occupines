@@ -12,7 +12,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.AppDatabase;
 import com.example.occupines.R;
+import com.example.occupines.RoomDAO;
 import com.example.occupines.Utility;
 import com.example.occupines.fragments.FourthFragment;
 import com.example.occupines.models.Event;
@@ -59,6 +61,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         }
 
         private void deleteEvent(Event event) {
+            AppDatabase appDatabase = AppDatabase.getAppDatabase(context);
+            RoomDAO roomDAO = appDatabase.getRoomDAO();
+            roomDAO.deleteById(event.getNotificationId());
+
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             db.collection("events").document(event.getId())
                     .delete()
@@ -71,7 +77,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                         Utility.showToast(context, "Error: Submission failed");
                         Log.w("EventAdapter", "Error writing document", e);
                     });
-
         }
 
         public void setOnClickListener(Event event) {

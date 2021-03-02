@@ -1,32 +1,43 @@
 package com.example.occupines.fragments;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
+import android.app.AlarmManager;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.AppDatabase;
 import com.example.occupines.DayViewContainer;
 import com.example.occupines.LoadingDialog;
 import com.example.occupines.MonthViewContainer;
+import com.example.occupines.NotifierAlarm;
 import com.example.occupines.R;
+import com.example.occupines.RoomDAO;
 import com.example.occupines.Utility;
 import com.example.occupines.adapters.EventAdapter;
 import com.example.occupines.models.Event;
+import com.example.occupines.models.Reminders;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,14 +55,18 @@ import com.kizitonwose.calendarview.ui.MonthHeaderFooterBinder;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class FourthFragment extends Fragment {
 
@@ -74,6 +89,9 @@ public class FourthFragment extends Fragment {
     private static EventAdapter eventAdapter;
     private static Set<Event> calendarEvents;
     private static List<Event> events;
+
+    private Dialog dialog;
+    private AppDatabase appDatabase;
 
     public FourthFragment() {
         // Required empty public constructor
@@ -187,6 +205,7 @@ public class FourthFragment extends Fragment {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
         loadingDialog = new LoadingDialog(getActivity());
+        appDatabase = AppDatabase.getAppDatabase(getContext());
     }
 
     @Override
@@ -288,32 +307,77 @@ public class FourthFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
-    private void inputDialog() {
-        final EditText input = new EditText(getContext());
+    public void inputDialog() {
+        dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.floating_popup);
 
-        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
-            switch (which) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    //Yes button clicked
-                    if (!input.getText().toString().trim().isEmpty()) {
-                        addEvent(new Event(currentUser.getUid(), input.getText().toString(), selectedDate));
-                    } else {
-                        Utility.showToast(getContext(), "Field is empty");
-                    }
-                    break;
+        Button select = dialog.findViewById(R.id.selectDate);
+        Button add = dialog.findViewById(R.id.addButton);
 
-                case DialogInterface.BUTTON_NEGATIVE:
-                    //No button clicked
-                    break;
+        final TextView date = dialog.findViewById(R.id.date);
+        final EditText message = dialog.findViewById(R.id.message);
+
+        final Calendar newCalender = Calendar.getInstance();
+        select.setOnClickListener(v -> {
+            DatePickerDialog dialog = new DatePickerDialog(getContext(), (view, year, month, dayOfMonth) -> {
+
+                final Calendar newDate = Calendar.getInstance();
+                Calendar newTime = Calendar.getInstance();
+                TimePickerDialog time = new TimePickerDialog(getContext(), (view1, hourOfDay, minute) -> {
+
+                    newDate.set(year, month, dayOfMonth, hourOfDay, minute, 0);
+                    Calendar tem = Calendar.getInstance();
+                    Log.w("TIME", System.currentTimeMillis() + "");
+                    if (newDate.getTimeInMillis() - tem.getTimeInMillis() > 0)
+                        date.setText(newDate.getTime().toString());
+                    else
+                        Toast.makeText(getContext(), "Invalid time", Toast.LENGTH_SHORT).show();
+
+                }, newTime.get(Calendar.HOUR_OF_DAY), newTime.get(Calendar.MINUTE), true);
+                time.show();
+
+            }, newCalender.get(Calendar.YEAR), newCalender.get(Calendar.MONTH), newCalender.get(Calendar.DAY_OF_MONTH));
+
+            dialog.getDatePicker().setMinDate(System.currentTimeMillis());
+            dialog.show();
+        });
+
+        add.setOnClickListener(v -> {
+            if (!message.getText().toString().trim().isEmpty()) {
+                RoomDAO roomDAO = appDatabase.getRoomDAO();
+
+                Reminders reminders = new Reminders();
+                reminders.setMessage(message.getText().toString().trim());
+                Date remind = new Date(date.getText().toString().trim());
+
+                reminders.setRemindDate(remind);
+                roomDAO.Insert(reminders);
+                List<Reminders> l = roomDAO.getAll();
+                reminders = l.get(l.size() - 1);
+                Log.e("ID chahiye", reminders.getId() + "");
+
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+5:30"));
+                calendar.setTime(remind);
+                calendar.set(Calendar.SECOND, 0);
+                Intent intent = new Intent(getContext(), NotifierAlarm.class);
+                intent.putExtra("Message", reminders.getMessage());
+                intent.putExtra("RemindDate", reminders.getRemindDate().toString());
+                intent.putExtra("id", reminders.getId());
+                PendingIntent intent1 = PendingIntent.getBroadcast(getContext(), reminders.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                AlarmManager alarmManager = (AlarmManager) Objects.requireNonNull(getContext()).getSystemService(Context.ALARM_SERVICE);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intent1);
+
+                addEvent(new Event(reminders.getId(), currentUser.getUid(), message.getText().toString().trim(), new Date(date.getText().toString().trim()).toInstant().atZone(ZoneId.systemDefault()).toLocalDate()));
+                AppDatabase.destroyInstance();
+                dialog.dismiss();
+            } else {
+                Utility.showToast(getContext(), "Field is empty");
             }
-        };
+        });
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
-        builder.setView(input);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-        builder.setMessage("Add event").setPositiveButton("Save", dialogClickListener)
-                .setNegativeButton("Cancel", dialogClickListener).show();
-
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
     }
 
     private void addEvent(Event event) {

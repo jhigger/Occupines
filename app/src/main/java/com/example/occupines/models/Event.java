@@ -6,6 +6,7 @@ public class Event {
 
     private final LocalDate date;
     private String id;
+    private int notificationId;
 
     private String userId;
     private String text;
@@ -17,7 +18,8 @@ public class Event {
         this.date = date;
     }
 
-    public Event(String userId, String text, LocalDate date) {
+    public Event(int notificationId, String userId, String text, LocalDate date) {
+        this.notificationId = notificationId;
         this.userId = userId;
         this.text = text;
         this.date = date;
@@ -45,5 +47,9 @@ public class Event {
 
     public String getId() {
         return id;
+    }
+
+    public int getNotificationId() {
+        return notificationId;
     }
 }
