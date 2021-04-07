@@ -53,6 +53,9 @@ public class FirstFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    location = "";
+                }
                 return false;
             }
         });
