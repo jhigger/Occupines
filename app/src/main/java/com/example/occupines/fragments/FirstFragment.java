@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,8 +23,8 @@ import java.util.ArrayList;
 
 public class FirstFragment extends Fragment {
 
-    private static final String TAG = "FirstFragment";
     public static ArrayList<String> checked = new ArrayList<>();
+    public static String location = "";
 
     public FirstFragment() {
         // Required empty public constructor
@@ -40,6 +41,21 @@ public class FirstFragment extends Fragment {
         userImage.setOnClickListener(v -> setCurrentFragment(new ProfileFragment(), userImage));
         //Set userImage source to downloaded image from MainActivity
         setImage(userImage);
+
+        SearchView searchView = view.findViewById(R.id.sv_location);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                location = searchView.getQuery().toString();
+                reloadCurrentFragment();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
 
         //Get burgerMenu reference
         ImageView burgerMenu = view.findViewById(R.id.burgerMenu);

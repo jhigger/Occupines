@@ -124,9 +124,17 @@ public class ListFragment extends Fragment {
                                         document.getString("info"),
                                         documentId);
 
-                                itemsData.add(propertyPost);
-                                if (mAdapter != null) mAdapter.notifyDataSetChanged();
-                                loadingDialog.dismiss();
+                                if (!FirstFragment.location.isEmpty()) {
+                                    if (propertyPost.getLocation().toLowerCase().contains(FirstFragment.location.toLowerCase())) {
+                                        itemsData.add(propertyPost);
+                                        if (mAdapter != null) mAdapter.notifyDataSetChanged();
+                                        loadingDialog.dismiss();
+                                    }
+                                } else {
+                                    itemsData.add(propertyPost);
+                                    if (mAdapter != null) mAdapter.notifyDataSetChanged();
+                                    loadingDialog.dismiss();
+                                }
                             });
                             if (localFile.delete()) {
                                 Log.d(TAG, "Temp file deleted");
