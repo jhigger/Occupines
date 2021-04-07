@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.occupines.R;
 
 public class SplashScreenActivity extends AppCompatActivity {
 

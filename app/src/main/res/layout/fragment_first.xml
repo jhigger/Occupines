@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -23,13 +23,29 @@
                 android:id="@+id/userImage"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_marginEnd="4dp"
                 android:contentDescription="@string/user"
                 android:src="@drawable/ic_user"
                 android:transitionName="profile"
                 app:civ_border_color="@color/primary"
                 app:civ_border_width="1dp"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/sv_location"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <SearchView
+                android:id="@+id/sv_location"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/edit_text_style"
+                android:elevation="5dp"
+                android:iconifiedByDefault="false"
+                android:queryHint="Search location..."
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/burgerMenu"
+                app:layout_constraintStart_toEndOf="@+id/userImage"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
@@ -39,21 +55,28 @@
                 android:contentDescription="@string/menu"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/sv_location"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_menu" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <FrameLayout
-        android:id="@+id/propertyPosts"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/design_bottom_navigation_height"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardView">
 
-    </FrameLayout>
+        <FrameLayout
+            android:id="@+id/propertyPosts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

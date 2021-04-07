@@ -14,9 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.occupines.ChatActivity;
 import com.example.occupines.R;
 import com.example.occupines.Utility;
+import com.example.occupines.activities.ChatActivity;
 import com.example.occupines.models.Property;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,6 +24,7 @@ import com.google.firebase.firestore.SetOptions;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                 .fit()
                 .into(holder.photo);
         holder.type.setText(myListData.getType());
-        holder.price.setText(String.valueOf(myListData.getPrice()));
+        holder.price.setText(new DecimalFormat("#,##0.00").format(myListData.getPrice()));
         holder.location.setText(myListData.getLocation());
         holder.owner.setText(myListData.getOwner());
         holder.info.setText(myListData.getInfo());

@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.activities;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +13,9 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.occupines.LoadingDialog;
+import com.example.occupines.R;
+import com.example.occupines.Utility;
 import com.example.occupines.adapters.MessageAdapter;
 import com.example.occupines.models.Chat;
 import com.example.occupines.models.User;

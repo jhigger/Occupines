@@ -33,20 +33,20 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_api_key" />
 
-        <activity android:name=".SplashScreenActivity">
+        <activity android:name=".activities.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".RegisterActivity" />
+        <activity android:name=".activities.LoginActivity" />
+        <activity android:name=".activities.RegisterActivity" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity
-            android:name=".ChatActivity"
+            android:name=".activities.ChatActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <receiver android:name=".NotifierAlarm" />

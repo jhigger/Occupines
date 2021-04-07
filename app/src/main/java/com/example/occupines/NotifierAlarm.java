@@ -15,6 +15,7 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
+import com.example.occupines.activities.MainActivity;
 import com.example.occupines.models.Reminders;
 
 import java.util.Date;

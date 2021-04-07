@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.activities;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.occupines.R;
+import com.example.occupines.Utility;
 import com.example.occupines.databinding.ActivityMainBinding;
 import com.example.occupines.fragments.FifthFragment;
 import com.example.occupines.fragments.FirstFragment;

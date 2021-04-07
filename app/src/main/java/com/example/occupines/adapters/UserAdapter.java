@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.occupines.ChatActivity;
 import com.example.occupines.R;
+import com.example.occupines.activities.ChatActivity;
 import com.example.occupines.models.User;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;

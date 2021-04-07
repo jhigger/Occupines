@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.occupines.activities.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;

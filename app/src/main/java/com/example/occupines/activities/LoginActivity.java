@@ -1,4 +1,4 @@
-package com.example.occupines;
+package com.example.occupines.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 
+import com.example.occupines.LoadingDialog;
+import com.example.occupines.R;
+import com.example.occupines.Utility;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;

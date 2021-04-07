@@ -26,9 +26,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.occupines.LoadingDialog;
-import com.example.occupines.MainActivity;
 import com.example.occupines.R;
 import com.example.occupines.Utility;
+import com.example.occupines.activities.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;

@@ -80,50 +80,68 @@ public class ListFragment extends Fragment {
     private void getDocuments() {
         loadingDialog.start();
         itemsData.clear();
-        db.collection("properties")
-                .orderBy("createdAt", Query.Direction.ASCENDING)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                            if (document.exists()) {
-                                String documentId = document.getId();
-                                StorageReference propertyImageRef = storageRef
-                                        .child("images")
-                                        .child(documentId)
-                                        .child("property");
+        Query query = db.collection("properties");
 
-                                try {
-                                    File localFile = File.createTempFile(documentId, "jpg");
-                                    Log.d(TAG, Uri.fromFile(localFile).toString());
-                                    propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
-                                        Property propertyPost = new Property(
-                                                localFile,
-                                                document.getString("type"),
-                                                Objects.requireNonNull(document.getDouble("price")),
-                                                document.getString("location"),
-                                                document.getString("owner"),
-                                                document.getString("info"),
-                                                documentId);
+        if (FirstFragment.checked.isEmpty()) {
+            query = query.orderBy("createdAt", Query.Direction.ASCENDING);
+        } else {
+            if (FirstFragment.checked.contains("House")) {
+                query = query.whereEqualTo("type", "House");
+            } else if (FirstFragment.checked.contains("Apartment")) {
+                query = query.whereEqualTo("type", "Apartment");
+            } else if (FirstFragment.checked.contains("Boarding")) {
+                query = query.whereEqualTo("type", "Boarding");
+            }
 
-                                        itemsData.add(propertyPost);
-                                        if (mAdapter != null) mAdapter.notifyDataSetChanged();
-                                        loadingDialog.dismiss();
-                                    });
-                                    if (localFile.delete()) {
-                                        Log.d(TAG, "Temp file deleted");
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
-                                Log.d(TAG, "No such document");
+            if (FirstFragment.checked.contains("Ascending")) {
+                query = query.orderBy("price", Query.Direction.ASCENDING);
+            } else if (FirstFragment.checked.contains("Descending")) {
+                query = query.orderBy("price", Query.Direction.DESCENDING);
+            }
+        }
+
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                    if (document.exists()) {
+                        String documentId = document.getId();
+                        StorageReference propertyImageRef = storageRef
+                                .child("images")
+                                .child(documentId)
+                                .child("property1")
+                                .child("image1");
+
+                        try {
+                            File localFile = File.createTempFile(documentId, "jpg");
+                            Log.d(TAG, Uri.fromFile(localFile).toString());
+                            propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
+                                Property propertyPost = new Property(
+                                        localFile,
+                                        document.getString("type"),
+                                        Objects.requireNonNull(document.getDouble("price")),
+                                        document.getString("location"),
+                                        document.getString("owner"),
+                                        document.getString("info"),
+                                        documentId);
+
+                                itemsData.add(propertyPost);
+                                if (mAdapter != null) mAdapter.notifyDataSetChanged();
+                                loadingDialog.dismiss();
+                            });
+                            if (localFile.delete()) {
+                                Log.d(TAG, "Temp file deleted");
                             }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
+                        Log.d(TAG, "No such document");
                     }
-                });
+                }
+            } else {
+                Log.w(TAG, "Error getting documents.", task.getException());
+            }
+        });
     }
 
     @Override
