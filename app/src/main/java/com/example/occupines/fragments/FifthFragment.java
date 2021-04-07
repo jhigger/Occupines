@@ -1,18 +1,24 @@
 package com.example.occupines.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,6 +47,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.maps.android.SphericalUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,6 +79,7 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
     private Button showRentals;
     private GoogleApiClient googleApiClient;
     private Marker currentUserLocationMarker;
+    private Marker searchedLocationMarker;
 
     public FifthFragment() {
     }
@@ -121,8 +129,15 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
                     userMarkerOptions.position(latLng);
                     userMarkerOptions.title(location);
                     userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                    map.addMarker(userMarkerOptions).showInfoWindow();
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+
+                    if (searchedLocationMarker != null) {
+                        searchedLocationMarker.remove();
+                    } else {
+                        map.clear();
+                    }
+                    searchedLocationMarker = map.addMarker(userMarkerOptions);
+                    searchedLocationMarker.showInfoWindow();
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(searchedLocationMarker.getPosition(), 18));
                 } else {
                     Utility.showToast(getContext(), "Place not found");
                 }
@@ -156,7 +171,6 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
 
     private void getDocuments() {
         loadingDialog.start();
-        map.clear();
 
         db.collection("properties")
                 .orderBy("createdAt", Query.Direction.ASCENDING)
@@ -187,9 +201,19 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
                                 if (geoResults.size() > 0) {
                                     Address address = geoResults.get(0);
                                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                                    map.addMarker(new MarkerOptions().position(latLng)
+
+                                    MarkerOptions markerOptions = new MarkerOptions().position(latLng)
                                             .title(propertyPost.getLocation())
-                                            .snippet("₱ " + propertyPost.getPrice()));
+                                            .snippet("₱ " + propertyPost.getPrice());
+
+                                    Marker marker = map.addMarker(markerOptions);
+
+                                    if (searchedLocationMarker != null) {
+                                        // Get distance of searched location and a marker
+                                        double distance = SphericalUtil.computeDistanceBetween(marker.getPosition(), searchedLocationMarker.getPosition());
+                                        marker.setSnippet(marker.getSnippet() +
+                                                "\n" + String.format(Locale.getDefault(), "%.2f", distance / 1000) + "km");
+                                    }
                                 }
                             } else {
                                 Log.d(TAG, "No such document");
@@ -200,6 +224,8 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
                         map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13)); //could be 2 - 21
                         Utility.showToast(getContext(), "Showing nearby rentals");
+
+                        searchedLocationMarker = null;
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
                     }
@@ -246,6 +272,36 @@ public class FifthFragment extends Fragment implements OnMapReadyCallback,
 
         //Set map view to display a normal view
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                Context context = getContext();
+
+                LinearLayout info = new LinearLayout(context);
+                info.setOrientation(LinearLayout.VERTICAL);
+
+                TextView title = new TextView(context);
+                title.setTextColor(Color.BLACK);
+                title.setGravity(Gravity.CENTER);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setText(marker.getTitle());
+
+                TextView snippet = new TextView(context);
+                snippet.setTextColor(Color.GRAY);
+                snippet.setText(marker.getSnippet());
+
+                info.addView(title);
+                info.addView(snippet);
+
+                return info;
+            }
+        });
 
         //Zoom to marker on click
         map.setOnMarkerClickListener(marker -> {
