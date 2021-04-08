@@ -108,34 +108,43 @@ public class ProfileFragment extends Fragment {
 
         editName.setOnClickListener(v -> changeName());
 
-        viewProperty.setOnClickListener(v -> db.collection(COLLECTION).document(currentUser.getUid())
-                .get().addOnCompleteListener(task -> {
+        viewProperty.setOnClickListener(v ->
+                db.collection("users").document(currentUser.getUid()).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         assert document != null;
                         if (document.exists()) {
                             Log.d(TAG, "Document exists!");
-                            setCurrentFragment(new PropertyFragment());
+                            int propertyCount = Objects.requireNonNull(document.getLong("propertyCount")).intValue();
+
+                            if (propertyCount > 0) {
+                                setCurrentFragment(new PropertyFragment());
+                            } else {
+                                Utility.showToast(getContext(), "You have no property listed");
+                            }
                         } else {
                             Log.d(TAG, "Document does not exist!");
-                            Utility.showToast(getContext(), "You have no property listed");
                         }
                     } else {
                         Log.d(TAG, "Failed with: ", task.getException());
                     }
                 }));
 
-        listProperty.setOnClickListener(v -> db.collection(COLLECTION).document(currentUser.getUid())
+        listProperty.setOnClickListener(v -> db.collection("users").document(currentUser.getUid())
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         assert document != null;
                         if (document.exists()) {
                             Log.d(TAG, "Document exists!");
-                            Utility.showToast(getContext(), "You can only submit 1 property");
-                        } else {
-                            Log.d(TAG, "Document does not exist!");
-                            setCurrentFragment(new FormFragment());
+                            int propertyCount = Objects.requireNonNull(document.getLong("propertyCount")).intValue();
+
+                            if (propertyCount >= 3) {
+                                Utility.showToast(getContext(), "You can only submit 3 property");
+                            } else {
+                                Log.d(TAG, propertyCount + "/3 properties");
+                                setCurrentFragment(FormFragment.newInstance(propertyCount));
+                            }
                         }
                     } else {
                         Log.d(TAG, "Failed with: ", task.getException());

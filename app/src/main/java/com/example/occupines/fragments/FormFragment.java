@@ -34,6 +34,7 @@ import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -58,6 +59,8 @@ public class FormFragment extends Fragment {
     private EditText info;
     private Button submit;
 
+    private int propertyCount;
+
     public FormFragment() {
         // Required empty public constructor
     }
@@ -66,6 +69,14 @@ public class FormFragment extends Fragment {
         FormFragment fragment = new FormFragment();
         Bundle args = new Bundle();
         args.putParcelable("property", property);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static FormFragment newInstance(int propertyCount) {
+        FormFragment fragment = new FormFragment();
+        Bundle args = new Bundle();
+        args.putInt("propertyCount", propertyCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -143,33 +154,39 @@ public class FormFragment extends Fragment {
         //Check if data given from other fragment is empty
         //It is not empty if FormFragment was called from edit property
         if (getArguments() != null) {
-            Property property = getArguments().getParcelable("property");
+            if (getArguments().getParcelable("property") != null) {
 
-            downloadImage(property);
+                Property property = getArguments().getParcelable("property");
 
-            switch (property.getType()) {
-                case "House":
-                    type.setSelection(0);
-                    break;
-                case "Apartment":
-                    type.setSelection(1);
-                    break;
-                case "Boarding":
-                    type.setSelection(2);
-                    break;
+                downloadImage(property);
+
+                switch (property.getType()) {
+                    case "House":
+                        type.setSelection(0);
+                        break;
+                    case "Apartment":
+                        type.setSelection(1);
+                        break;
+                    case "Boarding":
+                        type.setSelection(2);
+                        break;
+                }
+
+                price.setText(new DecimalFormat("#,##0.00").format(property.getPrice()));
+                location.setText(property.getLocation());
+                info.setText(property.getInfo());
+
+                submit.setText(R.string.save);
+                submit.setOnClickListener(v -> updateProperty(
+                        type.getSelectedItem().toString(),
+                        Double.parseDouble(price.getText().toString()),
+                        location.getText().toString(),
+                        info.getText().toString(),
+                        property.getId()
+                ));
+            } else if (getArguments().getInt("propertyCount") != 0) {
+                propertyCount = getArguments().getInt("propertyCount");
             }
-
-            price.setText(String.valueOf(property.getPrice()));
-            location.setText(property.getLocation());
-            info.setText(property.getInfo());
-
-            submit.setText(R.string.save);
-            submit.setOnClickListener(v -> updateProperty(
-                    type.getSelectedItem().toString(),
-                    Double.parseDouble(price.getText().toString()),
-                    location.getText().toString(),
-                    info.getText().toString()
-            ));
         }
     }
 
@@ -190,7 +207,7 @@ public class FormFragment extends Fragment {
     }
 
     //Updates property from edit property
-    private void updateProperty(String type, double price, String location, String info) {
+    private void updateProperty(String type, double price, String location, String info, String id) {
         loadingDialog.start();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -201,7 +218,7 @@ public class FormFragment extends Fragment {
         property.put("info", info);
         property.put("updatedAt", FieldValue.serverTimestamp());
 
-        db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
+        db.collection(COLLECTION).document(id)
                 .update(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
@@ -232,7 +249,8 @@ public class FormFragment extends Fragment {
         property.put("info", info);
         property.put("createdAt", FieldValue.serverTimestamp());
 
-        db.collection(COLLECTION).document(Objects.requireNonNull(mAuth.getUid()))
+        String userId = Objects.requireNonNull(mAuth.getUid());
+        db.collection(COLLECTION).document(propertyCount > 0 ? userId + "-" + propertyCount : userId)
                 .set(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
@@ -243,6 +261,9 @@ public class FormFragment extends Fragment {
                     Utility.showToast(getContext(), "Error: Submission failed");
                     Log.w(TAG, "Error writing document", e);
                 });
+
+        db.collection("users").document(userId)
+                .update("propertyCount", ++propertyCount);
     }
 
     //Downloads the photo from firebase storage when editing
@@ -260,7 +281,10 @@ public class FormFragment extends Fragment {
     //Uploads the photo chosen from gallery to firebase storage
     private void uploadImage() {
         //images/User id/property.jpg
-        StorageReference pathReference = storageRef.child("images").child(Objects.requireNonNull(mAuth.getUid())).child("property");
+        StorageReference pathReference = storageRef.child("images")
+                .child(Objects.requireNonNull(mAuth.getUid()))
+                .child("property" + propertyCount)
+                .child("image1");
         UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             assert getFragmentManager() != null;

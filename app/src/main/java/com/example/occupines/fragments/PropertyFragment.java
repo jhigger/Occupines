@@ -67,7 +67,7 @@ public class PropertyFragment extends Fragment {
         itemsData = new ArrayList<>();
         getData();
         // 3. create an adapter
-        mAdapter = new PropertyAdapter(itemsData);
+        mAdapter = new PropertyAdapter(itemsData, this);
         // 4. set adapter
         recyclerView.setAdapter(mAdapter);
         // 5. set item animator to DefaultAnimator
@@ -79,47 +79,52 @@ public class PropertyFragment extends Fragment {
     private void getData() {
         loadingDialog.start();
         itemsData.clear();
-        db.collection(COLLECTION).document(userId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        assert document != null;
-                        if (document.exists()) {
-                            StorageReference propertyImageRef = storageRef
-                                    .child("images")
-                                    .child(userId)
-                                    .child("property");
 
-                            try {
-                                File localFile = File.createTempFile(userId, "jpg");
-                                propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
-                                    Property propertyPost = new Property(
-                                            localFile,
-                                            document.getString("type"),
-                                            Objects.requireNonNull(document.getDouble("price")),
-                                            document.getString("location"),
-                                            document.getString("owner"),
-                                            document.getString("info"),
-                                            userId);
+        for (int i = 0; i < 3; i++) {
+            int temp = i + 1;
+            db.collection(COLLECTION).document(i > 0 ? userId + "-" + i : userId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            assert document != null;
+                            if (document.exists()) {
+                                StorageReference propertyImageRef = storageRef
+                                        .child("images")
+                                        .child(userId)
+                                        .child("property" + temp)
+                                        .child("image1");
 
-                                    itemsData.add(propertyPost);
-                                    if (mAdapter != null) mAdapter.notifyDataSetChanged();
-                                    loadingDialog.dismiss();
-                                });
-                                if (localFile.delete()) {
-                                    Log.d(TAG, "Temp file deleted");
+                                try {
+                                    File localFile = File.createTempFile(userId, "jpg");
+                                    propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
+                                        Property propertyPost = new Property(
+                                                localFile,
+                                                document.getString("type"),
+                                                Objects.requireNonNull(document.getDouble("price")),
+                                                document.getString("location"),
+                                                document.getString("owner"),
+                                                document.getString("info"),
+                                                document.getId());
+
+                                        itemsData.add(propertyPost);
+                                        if (mAdapter != null) mAdapter.notifyDataSetChanged();
+                                        loadingDialog.dismiss();
+                                    });
+                                    if (localFile.delete()) {
+                                        Log.d(TAG, "Temp file deleted");
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            } else {
+                                Log.d(TAG, "No such document");
                             }
                         } else {
-                            Log.d(TAG, "No such document");
+                            Log.d(TAG, "get failed with ", task.getException());
                         }
-                    } else {
-                        Log.d(TAG, "get failed with ", task.getException());
-                    }
-                });
+                    });
+        }
     }
 
     @Override

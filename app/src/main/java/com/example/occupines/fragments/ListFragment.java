@@ -105,16 +105,22 @@ public class ListFragment extends Fragment {
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                     if (document.exists()) {
                         String documentId = document.getId();
+                        String substring = documentId.substring(documentId.length() - 2, documentId.length() - 1);
+
                         StorageReference propertyImageRef = storageRef
                                 .child("images")
-                                .child(documentId)
-                                .child("property1")
+                                .child(substring.equals("-") ?
+                                        documentId.substring(0, documentId.length() - 2) :
+                                        documentId)
+                                .child(substring.equals("-") ?
+                                        "property" + (Integer.parseInt(documentId.substring(documentId.length() - 1)) + 1) :
+                                        "property1")
                                 .child("image1");
 
                         try {
                             File localFile = File.createTempFile(documentId, "jpg");
                             Log.d(TAG, Uri.fromFile(localFile).toString());
-                            propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
+                            propertyImageRef.getFile(localFile).addOnSuccessListener(task1 -> {
                                 Property propertyPost = new Property(
                                         localFile,
                                         document.getString("type"),
@@ -135,6 +141,7 @@ public class ListFragment extends Fragment {
                                     if (mAdapter != null) mAdapter.notifyDataSetChanged();
                                     loadingDialog.dismiss();
                                 }
+
                             });
                             if (localFile.delete()) {
                                 Log.d(TAG, "Temp file deleted");
