@@ -177,7 +177,7 @@ public class FormFragment extends Fragment {
                         break;
                 }
 
-                price.setText(new DecimalFormat("#,##0.00").format(property.getPrice()));
+                price.setText(new DecimalFormat("###0").format(property.getPrice()));
                 location.setText(property.getLocation());
                 info.setText(property.getInfo());
 
