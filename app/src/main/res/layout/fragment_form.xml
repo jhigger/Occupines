@@ -47,7 +47,7 @@
         android:layout_height="0dp"
         android:contentDescription="@string/icon"
         android:transitionName="icon"
-        app:layout_constraintBottom_toTopOf="@+id/photo5"
+        app:layout_constraintBottom_toTopOf="@id/form"
         app:layout_constraintEnd_toStartOf="@+id/photo4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/photo1"
@@ -59,22 +59,10 @@
         android:layout_height="0dp"
         android:contentDescription="@string/icon"
         android:transitionName="icon"
-        app:layout_constraintBottom_toTopOf="@+id/photo5"
+        app:layout_constraintBottom_toTopOf="@+id/form"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/photo3"
         app:layout_constraintTop_toBottomOf="@+id/photo2"
-        app:srcCompat="@drawable/ic_camera" />
-
-    <ImageView
-        android:id="@+id/photo5"
-        android:layout_width="200dp"
-        android:layout_height="0dp"
-        android:contentDescription="@string/icon"
-        android:transitionName="icon"
-        app:layout_constraintBottom_toTopOf="@+id/form"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photo3"
         app:srcCompat="@drawable/ic_camera" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -88,7 +76,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photo5">
+        app:layout_constraintTop_toBottomOf="@+id/photo4">
 
         <TextView
             android:id="@+id/textType"
