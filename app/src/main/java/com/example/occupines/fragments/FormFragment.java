@@ -55,17 +55,14 @@ public class FormFragment extends Fragment {
     private Uri imagePath2;
     private Uri imagePath3;
     private Uri imagePath4;
-    private Uri imagePath5;
     private ImageView photo1;
     private ImageView photo2;
     private ImageView photo3;
     private ImageView photo4;
-    private ImageView photo5;
     private boolean hasPickedImage1;
     private boolean hasPickedImage2;
     private boolean hasPickedImage3;
     private boolean hasPickedImage4;
-    private boolean hasPickedImage5;
 
     private int imageCount;
     private int picked;
@@ -110,7 +107,6 @@ public class FormFragment extends Fragment {
         hasPickedImage2 = false;
         hasPickedImage3 = false;
         hasPickedImage4 = false;
-        hasPickedImage5 = false;
         imageCount = 0;
         picked = 0;
     }
@@ -125,13 +121,11 @@ public class FormFragment extends Fragment {
         photo2 = view.findViewById(R.id.photo2);
         photo3 = view.findViewById(R.id.photo3);
         photo4 = view.findViewById(R.id.photo4);
-        photo5 = view.findViewById(R.id.photo5);
         //Set ImageView on click event
         photo1.setOnClickListener(v -> pickImage(1));
         photo2.setOnClickListener(v -> pickImage(2));
         photo3.setOnClickListener(v -> pickImage(3));
         photo4.setOnClickListener(v -> pickImage(4));
-        photo5.setOnClickListener(v -> pickImage(5));
 
         //Get spinner reference
         type = view.findViewById(R.id.spinner);
@@ -161,7 +155,7 @@ public class FormFragment extends Fragment {
             //Check if fields are empty
             if (!priceString.isEmpty() && !locationString.isEmpty() && !infoString.isEmpty()) {
                 //Check if user already picked an image from gallery
-                if (hasPickedImage1 || hasPickedImage2 || hasPickedImage3 || hasPickedImage4 || hasPickedImage5) {
+                if (hasPickedImage1 || hasPickedImage2 || hasPickedImage3 || hasPickedImage4) {
                     //Call submitProperty method
                     submitProperty(typeString, Double.parseDouble(priceString), locationString, infoString);
                 } else {
@@ -253,11 +247,6 @@ public class FormFragment extends Fragment {
                         photo4.setImageBitmap(MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath4));
                         hasPickedImage4 = true;
                         break;
-                    case 5:
-                        imagePath5 = data.getData();
-                        photo5.setImageBitmap(MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath5));
-                        hasPickedImage5 = true;
-                        break;
                 }
                 imageCount++;
             } catch (IOException e) {
@@ -301,13 +290,6 @@ public class FormFragment extends Fragment {
                 imageCount++;
             }
         }
-        if (hasPickedImage5 || photo5.getTag() != null) {
-            if (photo5.getTag() == null) {
-                imageCount++;
-            } else if (photo5.getTag().equals("hasImage")) {
-                imageCount++;
-            }
-        }
 
         Map<String, Object> property = new HashMap<>();
         property.put("type", type);
@@ -321,7 +303,7 @@ public class FormFragment extends Fragment {
                 .update(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
-                    if (hasPickedImage1 || hasPickedImage2 || hasPickedImage3 || hasPickedImage4 || hasPickedImage5) {
+                    if (hasPickedImage1 || hasPickedImage2 || hasPickedImage3 || hasPickedImage4) {
                         uploadImage(Integer.parseInt(id.substring(id.length() - 1)));
                     } else {
                         assert getFragmentManager() != null;
@@ -488,24 +470,6 @@ public class FormFragment extends Fragment {
                     public void onError(Exception e) {
                     }
                 });
-
-        Picasso.get().load(property.getImageFile5())
-                .placeholder(R.drawable.ic_camera)
-                .error(R.drawable.ic_camera)
-                .priority(Picasso.Priority.HIGH)
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .centerInside()
-                .fit()
-                .into(photo5, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        photo5.setTag("hasImage");
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                    }
-                });
     }
 
     //Uploads the photo chosen from gallery to firebase storage
@@ -542,14 +506,6 @@ public class FormFragment extends Fragment {
                     .child("property" + i)
                     .child("image4");
             pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath4));
-        }
-        if (hasPickedImage5) {
-            StorageReference pathReference = storageRef
-                    .child("images")
-                    .child(Objects.requireNonNull(mAuth.getUid()))
-                    .child("property" + i)
-                    .child("image5");
-            pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath5));
         }
 
         assert getFragmentManager() != null;
