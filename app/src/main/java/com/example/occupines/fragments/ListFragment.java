@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -38,6 +39,7 @@ public class ListFragment extends Fragment {
     private StorageReference storageRef;
     private LoadingDialog loadingDialog;
 
+    private TextView noPosts;
     private RecyclerView recyclerView;
     private MyListAdapter mAdapter;
     private ArrayList<Property> itemsData;
@@ -60,7 +62,7 @@ public class ListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_list, container, false);
-
+        noPosts = view.findViewById(R.id.noPosts);
         // 1. get a reference to recyclerView
         recyclerView = view.findViewById(R.id.recyclerView);
         // 2. set layoutManger
@@ -105,16 +107,11 @@ public class ListFragment extends Fragment {
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                     if (document.exists()) {
                         String documentId = document.getId();
-                        String substring = documentId.substring(documentId.length() - 2, documentId.length() - 1);
 
                         StorageReference propertyImageRef = storageRef
                                 .child("images")
-                                .child(substring.equals("-") ?
-                                        documentId.substring(0, documentId.length() - 2) :
-                                        documentId)
-                                .child(substring.equals("-") ?
-                                        "property" + (Integer.parseInt(documentId.substring(documentId.length() - 1)) + 1) :
-                                        "property1")
+                                .child(documentId)
+                                .child("property" + (Integer.parseInt(documentId.substring(documentId.length() - 1))))  //  Get last number of doc id
                                 .child("image1");
 
                         try {
@@ -134,14 +131,11 @@ public class ListFragment extends Fragment {
                                     if (propertyPost.getLocation().toLowerCase().contains(FirstFragment.location.toLowerCase())) {
                                         itemsData.add(propertyPost);
                                         if (mAdapter != null) mAdapter.notifyDataSetChanged();
-                                        loadingDialog.dismiss();
                                     }
                                 } else {
                                     itemsData.add(propertyPost);
                                     if (mAdapter != null) mAdapter.notifyDataSetChanged();
-                                    loadingDialog.dismiss();
                                 }
-
                             });
                             if (localFile.delete()) {
                                 Log.d(TAG, "Temp file deleted");
@@ -155,6 +149,11 @@ public class ListFragment extends Fragment {
                 }
             } else {
                 Log.w(TAG, "Error getting documents.", task.getException());
+            }
+            if (itemsData.isEmpty()) {
+                recyclerView.setVisibility(View.GONE);
+                noPosts.setVisibility(View.VISIBLE);
+                loadingDialog.dismiss();
             }
         });
     }

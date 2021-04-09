@@ -25,6 +25,7 @@ import com.example.occupines.R;
 import com.example.occupines.Utility;
 import com.example.occupines.models.Property;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -45,6 +46,8 @@ public class FormFragment extends Fragment {
     private static final int PICK_IMAGE = 123;
     private static final String COLLECTION = "properties";
 
+    private FirebaseFirestore db;
+    private String userId;
     private StorageReference storageRef;
     private FirebaseAuth mAuth;
     private LoadingDialog loadingDialog;
@@ -85,6 +88,8 @@ public class FormFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        userId = mAuth.getUid();
         storageRef = FirebaseStorage.getInstance().getReference();
         loadingDialog = new LoadingDialog(getActivity());
         pickedImage = false;
@@ -209,7 +214,6 @@ public class FormFragment extends Fragment {
     //Updates property from edit property
     private void updateProperty(String type, double price, String location, String info, String id) {
         loadingDialog.start();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> property = new HashMap<>();
         property.put("type", type);
@@ -239,7 +243,6 @@ public class FormFragment extends Fragment {
     //Submits property to firestore properties collection
     private void submitProperty(String type, double price, String location, String info) {
         loadingDialog.start();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Map<String, Object> property = new HashMap<>();
         property.put("type", type);
@@ -249,8 +252,61 @@ public class FormFragment extends Fragment {
         property.put("info", info);
         property.put("createdAt", FieldValue.serverTimestamp());
 
-        String userId = Objects.requireNonNull(mAuth.getUid());
-        db.collection(COLLECTION).document(propertyCount > 0 ? userId + "-" + propertyCount : userId)
+        propertyCount++;
+        db.collection("users").document(userId)
+                .update("propertyCount", propertyCount);
+
+        db.collection("users").document(userId + "-" + 1).get().addOnCompleteListener(task1 -> {
+            if (task1.isSuccessful()) {
+                DocumentSnapshot document1 = task1.getResult();
+                assert document1 != null;
+                // exists
+                if (document1.exists()) {
+                    Log.d(TAG, "Document exists!");
+                    db.collection("users").document(userId + "-" + 2).get().addOnCompleteListener(task2 -> {
+                        if (task2.isSuccessful()) {
+                            DocumentSnapshot document2 = task2.getResult();
+                            assert document2 != null;
+                            // exists
+                            if (document2.exists()) {
+                                Log.d(TAG, "Document exists!");
+                                db.collection("users").document(userId + "-" + 3).get().addOnCompleteListener(task3 -> {
+                                    if (task3.isSuccessful()) {
+                                        DocumentSnapshot document = task3.getResult();
+                                        assert document != null;
+
+                                        // doesn't exists
+                                        // create new doc 3
+                                        createDoc(property, 3);
+
+                                    } else {
+                                        Log.d(TAG, "Failed with: ", task3.getException());
+                                    }
+                                });
+                            }
+                            // doesn't exists
+                            else {
+                                // create new doc 2
+                                createDoc(property, 2);
+                            }
+                        } else {
+                            Log.d(TAG, "Failed with: ", task2.getException());
+                        }
+                    });
+                }
+                // doesn't exists
+                else {
+                    // create new doc 1
+                    createDoc(property, 1);
+                }
+            } else {
+                Log.d(TAG, "Failed with: ", task1.getException());
+            }
+        });
+    }
+
+    private void createDoc(Map<String, Object> property, int i) {
+        db.collection(COLLECTION).document(userId + "-" + i)
                 .set(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
@@ -261,9 +317,6 @@ public class FormFragment extends Fragment {
                     Utility.showToast(getContext(), "Error: Submission failed");
                     Log.w(TAG, "Error writing document", e);
                 });
-
-        db.collection("users").document(userId)
-                .update("propertyCount", ++propertyCount);
     }
 
     //Downloads the photo from firebase storage when editing
