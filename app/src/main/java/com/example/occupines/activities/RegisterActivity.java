@@ -114,6 +114,7 @@ public class RegisterActivity extends AppCompatActivity {
         HashMap<String, Object> user = new HashMap<>();
         user.put("username", fullName);
         user.put("imageUrl", "default");
+        user.put("propertyCount", 0);
         db.collection("users").document(firebaseUser.getUid()).set(user);
     }
 
