@@ -274,27 +274,37 @@ public class FormFragment extends Fragment {
         int imageCount = 0;
 
         if (hasPickedImage1 || photo1.getTag() != null) {
-            if (photo1.getTag().equals("hasImage")) {
+            if (photo1.getTag() == null) {
+                imageCount++;
+            } else if (photo1.getTag().equals("hasImage")) {
                 imageCount++;
             }
         }
         if (hasPickedImage2 || photo2.getTag() != null) {
-            if (photo2.getTag().equals("hasImage")) {
+            if (photo2.getTag() == null) {
+                imageCount++;
+            } else if (photo2.getTag().equals("hasImage")) {
                 imageCount++;
             }
         }
         if (hasPickedImage3 || photo3.getTag() != null) {
-            if (photo3.getTag().equals("hasImage")) {
+            if (photo3.getTag() == null) {
+                imageCount++;
+            } else if (photo3.getTag().equals("hasImage")) {
                 imageCount++;
             }
         }
         if (hasPickedImage4 || photo4.getTag() != null) {
-            if (photo4.getTag().equals("hasImage")) {
+            if (photo4.getTag() == null) {
+                imageCount++;
+            } else if (photo4.getTag().equals("hasImage")) {
                 imageCount++;
             }
         }
         if (hasPickedImage5 || photo5.getTag() != null) {
-            if (photo5.getTag().equals("hasImage")) {
+            if (photo5.getTag() == null) {
+                imageCount++;
+            } else if (photo5.getTag().equals("hasImage")) {
                 imageCount++;
             }
         }
