@@ -114,7 +114,7 @@ public class ListFragment extends Fragment {
 
                         StorageReference propertyImageRef = storageRef
                                 .child("images")
-                                .child(user.getUid())
+                                .child(documentId.substring(0, documentId.length() - 2))
                                 .child("property" + Integer.parseInt(documentId.substring(documentId.length() - 1)))  //  Get last number of doc id
                                 .child("image1");
 
