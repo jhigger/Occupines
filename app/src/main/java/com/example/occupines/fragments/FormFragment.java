@@ -227,7 +227,7 @@ public class FormFragment extends Fragment {
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
                     if (pickedImage) {
-                        uploadImage();
+                        uploadImage(Integer.parseInt(id.substring(id.length() - 1)));
                     } else {
                         assert getFragmentManager() != null;
                         getFragmentManager().popBackStack();
@@ -311,7 +311,7 @@ public class FormFragment extends Fragment {
                 .set(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
-                    uploadImage();
+                    uploadImage(i);
                     Utility.showToast(getContext(), "Property submitted");
                 })
                 .addOnFailureListener(e -> {
@@ -333,11 +333,11 @@ public class FormFragment extends Fragment {
     }
 
     //Uploads the photo chosen from gallery to firebase storage
-    private void uploadImage() {
+    private void uploadImage(int i) {
         //images/User id/property.jpg
         StorageReference pathReference = storageRef.child("images")
                 .child(Objects.requireNonNull(mAuth.getUid()))
-                .child("property" + propertyCount)
+                .child("property" + i)
                 .child("image1");
         UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
         uploadTask.addOnSuccessListener(taskSnapshot -> {
