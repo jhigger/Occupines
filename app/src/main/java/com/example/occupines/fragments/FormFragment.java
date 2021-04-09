@@ -1,7 +1,6 @@
 package com.example.occupines.fragments;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -30,7 +29,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -52,9 +51,24 @@ public class FormFragment extends Fragment {
     private FirebaseAuth mAuth;
     private LoadingDialog loadingDialog;
 
-    private Uri imagePath;
-    private ImageView photo;
-    private boolean pickedImage;
+    private Uri imagePath1;
+    private Uri imagePath2;
+    private Uri imagePath3;
+    private Uri imagePath4;
+    private Uri imagePath5;
+    private ImageView photo1;
+    private ImageView photo2;
+    private ImageView photo3;
+    private ImageView photo4;
+    private ImageView photo5;
+    private boolean hasPickedImage1;
+    private boolean hasPickedImage2;
+    private boolean hasPickedImage3;
+    private boolean hasPickedImage4;
+    private boolean hasPickedImage5;
+
+    private int imageCount;
+    private int picked;
 
     private Spinner type;
     private EditText price;
@@ -92,7 +106,13 @@ public class FormFragment extends Fragment {
         userId = mAuth.getUid();
         storageRef = FirebaseStorage.getInstance().getReference();
         loadingDialog = new LoadingDialog(getActivity());
-        pickedImage = false;
+        hasPickedImage1 = false;
+        hasPickedImage2 = false;
+        hasPickedImage3 = false;
+        hasPickedImage4 = false;
+        hasPickedImage5 = false;
+        imageCount = 0;
+        picked = 0;
     }
 
     @Override
@@ -101,15 +121,17 @@ public class FormFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_form, container, false);
         //Get ImageView reference
-        photo = view.findViewById(R.id.photo);
+        photo1 = view.findViewById(R.id.photo1);
+        photo2 = view.findViewById(R.id.photo2);
+        photo3 = view.findViewById(R.id.photo3);
+        photo4 = view.findViewById(R.id.photo4);
+        photo5 = view.findViewById(R.id.photo5);
         //Set ImageView on click event
-        photo.setOnClickListener(v -> {
-            Intent profileIntent = new Intent();
-            profileIntent.setType("image/*");
-            profileIntent.setAction(Intent.ACTION_GET_CONTENT);
-            //Open gallery to select photo
-            startActivityForResult(Intent.createChooser(profileIntent, "Select Image."), PICK_IMAGE);
-        });
+        photo1.setOnClickListener(v -> pickImage(1));
+        photo2.setOnClickListener(v -> pickImage(2));
+        photo3.setOnClickListener(v -> pickImage(3));
+        photo4.setOnClickListener(v -> pickImage(4));
+        photo5.setOnClickListener(v -> pickImage(5));
 
         //Get spinner reference
         type = view.findViewById(R.id.spinner);
@@ -139,7 +161,7 @@ public class FormFragment extends Fragment {
             //Check if fields are empty
             if (!priceString.isEmpty() && !locationString.isEmpty() && !infoString.isEmpty()) {
                 //Check if user already picked an image from gallery
-                if (pickedImage) {
+                if (hasPickedImage1 || hasPickedImage2 || hasPickedImage3 || hasPickedImage4 || hasPickedImage5) {
                     //Call submitProperty method
                     submitProperty(typeString, Double.parseDouble(priceString), locationString, infoString);
                 } else {
@@ -153,6 +175,15 @@ public class FormFragment extends Fragment {
         return view;
     }
 
+    private void pickImage(int i) {
+        Intent profileIntent = new Intent();
+        profileIntent.setType("image/*");
+        profileIntent.setAction(Intent.ACTION_GET_CONTENT);
+        picked = i;
+        //Open gallery to select photo
+        startActivityForResult(Intent.createChooser(profileIntent, "Select Image."), PICK_IMAGE);
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -163,7 +194,7 @@ public class FormFragment extends Fragment {
 
                 Property property = getArguments().getParcelable("property");
 
-                downloadImage(property);
+                downloadImages(property);
 
                 switch (property.getType()) {
                     case "House":
@@ -199,11 +230,36 @@ public class FormFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PICK_IMAGE && resultCode == AppCompatActivity.RESULT_OK && data.getData() != null) {
-            imagePath = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath);
-                photo.setImageBitmap(bitmap);
-                pickedImage = true;
+                Log.d(TAG, "onActivityResult: " + picked);
+                switch (picked) {
+                    case 1:
+                        imagePath1 = data.getData();
+                        photo1.setImageBitmap(MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath1));
+                        hasPickedImage1 = true;
+                        break;
+                    case 2:
+                        imagePath2 = data.getData();
+                        photo2.setImageBitmap(MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath2));
+                        hasPickedImage2 = true;
+                        break;
+                    case 3:
+                        imagePath3 = data.getData();
+                        photo3.setImageBitmap(MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath3));
+                        hasPickedImage3 = true;
+                        break;
+                    case 4:
+                        imagePath4 = data.getData();
+                        photo4.setImageBitmap(MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath4));
+                        hasPickedImage4 = true;
+                        break;
+                    case 5:
+                        imagePath5 = data.getData();
+                        photo5.setImageBitmap(MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), imagePath5));
+                        hasPickedImage5 = true;
+                        break;
+                }
+                imageCount++;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -215,18 +271,47 @@ public class FormFragment extends Fragment {
     private void updateProperty(String type, double price, String location, String info, String id) {
         loadingDialog.start();
 
+        int imageCount = 0;
+
+        if (hasPickedImage1 || photo1.getTag() != null) {
+            if (photo1.getTag().equals("hasImage")) {
+                imageCount++;
+            }
+        }
+        if (hasPickedImage2 || photo2.getTag() != null) {
+            if (photo2.getTag().equals("hasImage")) {
+                imageCount++;
+            }
+        }
+        if (hasPickedImage3 || photo3.getTag() != null) {
+            if (photo3.getTag().equals("hasImage")) {
+                imageCount++;
+            }
+        }
+        if (hasPickedImage4 || photo4.getTag() != null) {
+            if (photo4.getTag().equals("hasImage")) {
+                imageCount++;
+            }
+        }
+        if (hasPickedImage5 || photo5.getTag() != null) {
+            if (photo5.getTag().equals("hasImage")) {
+                imageCount++;
+            }
+        }
+
         Map<String, Object> property = new HashMap<>();
         property.put("type", type);
         property.put("price", price);
         property.put("location", location);
         property.put("info", info);
         property.put("updatedAt", FieldValue.serverTimestamp());
+        property.put("imageCount", imageCount);
 
         db.collection(COLLECTION).document(id)
                 .update(property)
                 .addOnCompleteListener(task -> loadingDialog.dismiss())
                 .addOnSuccessListener(aVoid -> {
-                    if (pickedImage) {
+                    if (hasPickedImage1 || hasPickedImage2 || hasPickedImage3 || hasPickedImage4 || hasPickedImage5) {
                         uploadImage(Integer.parseInt(id.substring(id.length() - 1)));
                     } else {
                         assert getFragmentManager() != null;
@@ -251,7 +336,7 @@ public class FormFragment extends Fragment {
         property.put("owner", Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName());
         property.put("info", info);
         property.put("createdAt", FieldValue.serverTimestamp());
-        property.put("imageCount", 1);
+        property.put("imageCount", imageCount);
 
         propertyCount++;
         db.collection("users").document(userId)
@@ -321,29 +406,143 @@ public class FormFragment extends Fragment {
     }
 
     //Downloads the photo from firebase storage when editing
-    private void downloadImage(Property property) {
-        Picasso.get().load(property.getLocalFile())
+    private void downloadImages(Property property) {
+        Picasso.get().load(property.getImageFile1())
                 .placeholder(R.drawable.ic_camera)
                 .error(R.drawable.ic_camera)
                 .priority(Picasso.Priority.HIGH)
                 .networkPolicy(NetworkPolicy.OFFLINE)
                 .centerInside()
                 .fit()
-                .into(photo);
+                .into(photo1, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        photo1.setTag("hasImage");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                    }
+                });
+
+        Picasso.get().load(property.getImageFile2())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(photo2, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        photo2.setTag("hasImage");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                    }
+                });
+
+        Picasso.get().load(property.getImageFile3())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(photo3, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        photo3.setTag("hasImage");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                    }
+                });
+
+        Picasso.get().load(property.getImageFile4())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(photo4, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        photo4.setTag("hasImage");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                    }
+                });
+
+        Picasso.get().load(property.getImageFile5())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(photo5, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        photo5.setTag("hasImage");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                    }
+                });
     }
 
     //Uploads the photo chosen from gallery to firebase storage
     private void uploadImage(int i) {
-        //images/User id/property.jpg
-        StorageReference pathReference = storageRef.child("images")
-                .child(Objects.requireNonNull(mAuth.getUid()))
-                .child("property" + i)
-                .child("image1");
-        UploadTask uploadTask = pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath));
-        uploadTask.addOnSuccessListener(taskSnapshot -> {
-            assert getFragmentManager() != null;
-            getFragmentManager().popBackStack();
-        });
-    }
+        //images/User id/property index/image file(s)
+        if (hasPickedImage1) {
+            StorageReference pathReference = storageRef
+                    .child("images")
+                    .child(Objects.requireNonNull(mAuth.getUid()))
+                    .child("property" + i)
+                    .child("image1");
+            pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath1));
+        }
+        if (hasPickedImage2) {
+            StorageReference pathReference = storageRef
+                    .child("images")
+                    .child(Objects.requireNonNull(mAuth.getUid()))
+                    .child("property" + i)
+                    .child("image2");
+            pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath2));
+        }
+        if (hasPickedImage3) {
+            StorageReference pathReference = storageRef
+                    .child("images")
+                    .child(Objects.requireNonNull(mAuth.getUid()))
+                    .child("property" + i)
+                    .child("image3");
+            pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath3));
+        }
+        if (hasPickedImage4) {
+            StorageReference pathReference = storageRef
+                    .child("images")
+                    .child(Objects.requireNonNull(mAuth.getUid()))
+                    .child("property" + i)
+                    .child("image4");
+            pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath4));
+        }
+        if (hasPickedImage5) {
+            StorageReference pathReference = storageRef
+                    .child("images")
+                    .child(Objects.requireNonNull(mAuth.getUid()))
+                    .child("property" + i)
+                    .child("image5");
+            pathReference.putFile(Utility.compressImage(Objects.requireNonNull(getContext()), imagePath5));
+        }
 
+        assert getFragmentManager() != null;
+        getFragmentManager().popBackStack();
+    }
 }

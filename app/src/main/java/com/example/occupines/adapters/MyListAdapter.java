@@ -54,7 +54,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Property myListData = listData.get(position);
-        Picasso.get().load(myListData.getLocalFile())
+        Picasso.get().load(myListData.getImageFile1())
                 .placeholder(R.drawable.ic_camera)
                 .error(R.drawable.ic_camera)
                 .priority(Picasso.Priority.HIGH)

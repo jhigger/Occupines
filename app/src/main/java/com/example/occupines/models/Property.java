@@ -7,7 +7,50 @@ import java.io.File;
 
 public class Property implements Parcelable {
 
-    private File localFile;
+    private File imageFile1;
+    private File imageFile2;
+    private File imageFile3;
+    private File imageFile4;
+    private File imageFile5;
+
+    public Property(File imageFile1, String type, double price, String location, String owner, String info, String id) {
+        this.imageFile1 = imageFile1;
+        this.type = type;
+        this.price = price;
+        this.location = location;
+        this.owner = owner;
+        this.info = info;
+        this.id = id;
+    }
+
+    public File getImageFile2() {
+        return imageFile2;
+    }
+
+    public void setImageFile2(File imageFile2) {
+        this.imageFile2 = imageFile2;
+    }
+
+    public File getImageFile3() {
+        return imageFile3;
+    }
+
+    public void setImageFile3(File imageFile3) {
+        this.imageFile3 = imageFile3;
+    }
+
+    public File getImageFile4() {
+        return imageFile4;
+    }
+
+    public void setImageFile4(File imageFile4) {
+        this.imageFile4 = imageFile4;
+    }
+
+    public File getImageFile5() {
+        return imageFile5;
+    }
+
     private String type;
     private double price;
     private String location;
@@ -27,14 +70,8 @@ public class Property implements Parcelable {
         }
     };
 
-    public Property(File localFile, String type, double price, String location, String owner, String info, String id) {
-        this.localFile = localFile;
-        this.type = type;
-        this.price = price;
-        this.location = location;
-        this.owner = owner;
-        this.info = info;
-        this.id = id;
+    public void setImageFile5(File imageFile5) {
+        this.imageFile5 = imageFile5;
     }
 
     public Property(String type, double price, String location, String owner, String info, String id) {
@@ -53,12 +90,12 @@ public class Property implements Parcelable {
         info = in.readString();
     }
 
-    public File getLocalFile() {
-        return localFile;
+    public File getImageFile1() {
+        return imageFile1;
     }
 
-    public void setLocalFile(File localFile) {
-        this.localFile = localFile;
+    public void setImageFile1(File imageFile1) {
+        this.imageFile1 = imageFile1;
     }
 
     public String getType() {
