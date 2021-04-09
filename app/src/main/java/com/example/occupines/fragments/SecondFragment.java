@@ -121,8 +121,9 @@ public class SecondFragment extends Fragment {
                         String documentId = document.getId();
                         StorageReference propertyImageRef = storageRef
                                 .child("images")
-                                .child(documentId)
-                                .child("property");
+                                .child(documentId.substring(0, documentId.length() - 2))
+                                .child("property" + Integer.parseInt(documentId.substring(documentId.length() - 1)))  //  Get last number of doc id
+                                .child("image1");
 
                         try {
                             File localFile = File.createTempFile(documentId, "jpg");
