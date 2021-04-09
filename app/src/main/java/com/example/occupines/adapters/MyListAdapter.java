@@ -70,13 +70,15 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
 
         setLikeButton(myListData.getId(), holder.likeButton);
 
-        if (myListData.getId().equals(userId)) {
+        if (myListData.getId().equals(userId + "-" + 1) ||
+                myListData.getId().equals(userId + "-" + 2) ||
+                myListData.getId().equals(userId + "-" + 3)) {
             holder.messageButton.setVisibility(View.GONE);
             holder.likeButton.setVisibility(View.GONE);
         } else {
             holder.messageButton.setOnClickListener(v -> {
                 Intent intent = new Intent(holder.context, ChatActivity.class);
-                intent.putExtra("id", myListData.getId());
+                intent.putExtra("id", myListData.getId().substring(0, myListData.getId().length() - 2));
                 holder.context.startActivity(intent);
             });
             holder.likeButton.setOnClickListener(v -> {

@@ -80,9 +80,9 @@ public class PropertyFragment extends Fragment {
         loadingDialog.start();
         itemsData.clear();
 
-        for (int i = 0; i < 3; i++) {
-            int temp = i + 1;
-            db.collection(COLLECTION).document(i > 0 ? userId + "-" + i : userId)
+        for (int i = 1; i <= 3; i++) {
+            int num = i;
+            db.collection(COLLECTION).document(userId + "-" + i)
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
@@ -92,7 +92,7 @@ public class PropertyFragment extends Fragment {
                                 StorageReference propertyImageRef = storageRef
                                         .child("images")
                                         .child(userId)
-                                        .child("property" + temp)
+                                        .child("property" + num)
                                         .child("image1");
 
                                 try {
@@ -122,6 +122,7 @@ public class PropertyFragment extends Fragment {
                             }
                         } else {
                             Log.d(TAG, "get failed with ", task.getException());
+                            loadingDialog.dismiss();
                         }
                     });
         }

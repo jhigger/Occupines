@@ -104,14 +104,18 @@ public class ListFragment extends Fragment {
 
         query.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                if (itemsData.isEmpty()) {
+                    recyclerView.setVisibility(View.GONE);
+                    noPosts.setVisibility(View.VISIBLE);
+                }
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                     if (document.exists()) {
                         String documentId = document.getId();
 
                         StorageReference propertyImageRef = storageRef
                                 .child("images")
-                                .child(documentId)
-                                .child("property" + (Integer.parseInt(documentId.substring(documentId.length() - 1))))  //  Get last number of doc id
+                                .child(user.getUid())
+                                .child("property" + Integer.parseInt(documentId.substring(documentId.length() - 1)))  //  Get last number of doc id
                                 .child("image1");
 
                         try {
@@ -130,12 +134,13 @@ public class ListFragment extends Fragment {
                                 if (!FirstFragment.location.isEmpty()) {
                                     if (propertyPost.getLocation().toLowerCase().contains(FirstFragment.location.toLowerCase())) {
                                         itemsData.add(propertyPost);
-                                        if (mAdapter != null) mAdapter.notifyDataSetChanged();
                                     }
                                 } else {
                                     itemsData.add(propertyPost);
-                                    if (mAdapter != null) mAdapter.notifyDataSetChanged();
                                 }
+                                recyclerView.setVisibility(View.VISIBLE);
+                                noPosts.setVisibility(View.GONE);
+                                if (mAdapter != null) mAdapter.notifyDataSetChanged();
                             });
                             if (localFile.delete()) {
                                 Log.d(TAG, "Temp file deleted");
@@ -145,16 +150,16 @@ public class ListFragment extends Fragment {
                         }
                     } else {
                         Log.d(TAG, "No such document");
+                        if (itemsData.isEmpty()) {
+                            recyclerView.setVisibility(View.GONE);
+                            noPosts.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
             } else {
                 Log.w(TAG, "Error getting documents.", task.getException());
             }
-            if (itemsData.isEmpty()) {
-                recyclerView.setVisibility(View.GONE);
-                noPosts.setVisibility(View.VISIBLE);
-                loadingDialog.dismiss();
-            }
+            loadingDialog.dismiss();
         });
     }
 

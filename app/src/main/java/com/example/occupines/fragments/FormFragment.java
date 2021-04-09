@@ -251,26 +251,27 @@ public class FormFragment extends Fragment {
         property.put("owner", Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName());
         property.put("info", info);
         property.put("createdAt", FieldValue.serverTimestamp());
+        property.put("imageCount", 1);
 
         propertyCount++;
         db.collection("users").document(userId)
                 .update("propertyCount", propertyCount);
 
-        db.collection("users").document(userId + "-" + 1).get().addOnCompleteListener(task1 -> {
+        db.collection(COLLECTION).document(userId + "-" + 1).get().addOnCompleteListener(task1 -> {
             if (task1.isSuccessful()) {
                 DocumentSnapshot document1 = task1.getResult();
                 assert document1 != null;
                 // exists
                 if (document1.exists()) {
                     Log.d(TAG, "Document exists!");
-                    db.collection("users").document(userId + "-" + 2).get().addOnCompleteListener(task2 -> {
+                    db.collection(COLLECTION).document(userId + "-" + 2).get().addOnCompleteListener(task2 -> {
                         if (task2.isSuccessful()) {
                             DocumentSnapshot document2 = task2.getResult();
                             assert document2 != null;
                             // exists
                             if (document2.exists()) {
                                 Log.d(TAG, "Document exists!");
-                                db.collection("users").document(userId + "-" + 3).get().addOnCompleteListener(task3 -> {
+                                db.collection(COLLECTION).document(userId + "-" + 3).get().addOnCompleteListener(task3 -> {
                                     if (task3.isSuccessful()) {
                                         DocumentSnapshot document = task3.getResult();
                                         assert document != null;

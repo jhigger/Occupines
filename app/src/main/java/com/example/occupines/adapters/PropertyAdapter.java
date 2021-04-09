@@ -76,11 +76,11 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
                         holder.db.collection("properties").document(myListData.getId())
                                 .delete()
                                 .addOnSuccessListener(aVoid -> {
-                                    StorageReference propertyImageRef = holder.storageRef.child("images").child(holder.userId)
-                                            .child(myListData.getId().substring(myListData.getId().length() - 2, myListData.getId().length() - 1)
-                                                    .equals("-") ?
-                                                    "property" + (Integer.parseInt(myListData.getId().substring(myListData.getId().length() - 1)) + 1) :
-                                                    "property1");
+                                    StorageReference propertyImageRef = holder.storageRef
+                                            .child("images")
+                                            .child(holder.userId)
+                                            .child("property" + Integer.parseInt(myListData.getId().substring(myListData.getId().length() - 1)))
+                                            .child("image1");
                                     propertyImageRef.delete();
                                     //Complete
                                     Utility.showToast(holder.itemView.getContext(), "Property deleted.");
