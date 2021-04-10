@@ -3,20 +3,59 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/border">
+    android:background="@drawable/border"
+    android:padding="10dp">
 
     <ImageView
-        android:id="@+id/photoResult"
+        android:id="@+id/photoResult1"
         android:layout_width="0dp"
         android:layout_height="200dp"
-        android:layout_margin="20dp"
         android:background="@drawable/border"
         android:contentDescription="@string/property_image"
         android:padding="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintBottom_toTopOf="@+id/photoResult3"
+        app:layout_constraintEnd_toStartOf="@+id/photoResult2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_camera" />
+
+    <ImageView
+        android:id="@+id/photoResult2"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:background="@drawable/border"
+        android:contentDescription="@string/property_image"
+        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/photoResult4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/photoResult1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_camera" />
+
+    <ImageView
+        android:id="@+id/photoResult3"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:background="@drawable/border"
+        android:contentDescription="@string/property_image"
+        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout3"
+        app:layout_constraintEnd_toStartOf="@+id/photoResult4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/photoResult1"
+        app:srcCompat="@drawable/ic_camera" />
+
+    <ImageView
+        android:id="@+id/photoResult4"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:background="@drawable/border"
+        android:contentDescription="@string/property_image"
+        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/photoResult3"
+        app:layout_constraintTop_toBottomOf="@id/photoResult2"
         app:srcCompat="@drawable/ic_camera" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -28,7 +67,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photoResult">
+        app:layout_constraintTop_toBottomOf="@+id/photoResult3">
 
         <TextView
             android:id="@+id/textOwner"

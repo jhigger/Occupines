@@ -164,7 +164,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
             this.storageRef = FirebaseStorage.getInstance().getReference();
             this.loadingDialog = new LoadingDialog(context);
 
-            this.photo = itemView.findViewById(R.id.photoResult);
+            this.photo = itemView.findViewById(R.id.photoResult1);
             this.type = itemView.findViewById(R.id.typeResult);
             this.price = itemView.findViewById(R.id.priceResult);
             this.location = itemView.findViewById(R.id.locationResult);
