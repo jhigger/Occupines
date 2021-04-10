@@ -52,6 +52,7 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Property myListData = listData.get(position);
+
         Picasso.get().load(myListData.getImageFile1())
                 .placeholder(R.drawable.ic_camera)
                 .error(R.drawable.ic_camera)
@@ -59,7 +60,35 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
                 .networkPolicy(NetworkPolicy.OFFLINE)
                 .centerInside()
                 .fit()
-                .into(holder.photo);
+                .into(holder.photo1);
+
+        Picasso.get().load(myListData.getImageFile2())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(holder.photo2);
+
+        Picasso.get().load(myListData.getImageFile3())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(holder.photo3);
+
+        Picasso.get().load(myListData.getImageFile4())
+                .placeholder(R.drawable.ic_camera)
+                .error(R.drawable.ic_camera)
+                .priority(Picasso.Priority.HIGH)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .centerInside()
+                .fit()
+                .into(holder.photo4);
+
         holder.type.setText(myListData.getType());
         holder.price.setText(new DecimalFormat("#,##0.00").format(myListData.getPrice()));
         holder.location.setText(myListData.getLocation());
@@ -143,7 +172,10 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public final ImageView photo;
+        public final ImageView photo1;
+        public final ImageView photo2;
+        public final ImageView photo3;
+        public final ImageView photo4;
         public final TextView type;
         public final TextView price;
         public final TextView location;
@@ -164,7 +196,10 @@ public class PropertyAdapter extends RecyclerView.Adapter<PropertyAdapter.ViewHo
             this.storageRef = FirebaseStorage.getInstance().getReference();
             this.loadingDialog = new LoadingDialog(context);
 
-            this.photo = itemView.findViewById(R.id.photoResult1);
+            this.photo1 = itemView.findViewById(R.id.photoResult1);
+            this.photo2 = itemView.findViewById(R.id.photoResult2);
+            this.photo3 = itemView.findViewById(R.id.photoResult3);
+            this.photo4 = itemView.findViewById(R.id.photoResult4);
             this.type = itemView.findViewById(R.id.typeResult);
             this.price = itemView.findViewById(R.id.priceResult);
             this.location = itemView.findViewById(R.id.locationResult);

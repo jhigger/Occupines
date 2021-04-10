@@ -118,57 +118,52 @@ public class PropertyFragment extends Fragment {
                                         File imageFile2 = null;
                                         File imageFile3 = null;
                                         File imageFile4 = null;
-                                        File imageFile5 = null;
                                         try {
                                             imageFile2 = File.createTempFile(userId, "jpg");
                                             imageFile3 = File.createTempFile(userId, "jpg");
                                             imageFile4 = File.createTempFile(userId, "jpg");
-                                            imageFile5 = File.createTempFile(userId, "jpg");
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
 
                                         File finalImageFile = imageFile2;
+                                        File finalImageFile3 = imageFile3;
+                                        File finalImageFile1 = imageFile4;
                                         propertyImageRef.get().getFile(imageFile2).addOnCompleteListener(task2 ->
-                                                propertyPost[0].setImageFile2(finalImageFile));
+                                        {
+                                            propertyPost[0].setImageFile2(finalImageFile);
+
+                                            propertyImageRef.set(storageRef
+                                                    .child("images")
+                                                    .child(userId)
+                                                    .child("property" + num)
+                                                    .child("image3"));
+
+                                            propertyImageRef.get().getFile(finalImageFile3).addOnCompleteListener(task3 ->
+                                            {
+                                                propertyPost[0].setImageFile3(finalImageFile3);
+
+                                                propertyImageRef.set(storageRef
+                                                        .child("images")
+                                                        .child(userId)
+                                                        .child("property" + num)
+                                                        .child("image4"));
+
+                                                propertyImageRef.get().getFile(finalImageFile1).addOnCompleteListener(task4 ->
+                                                {
+                                                    propertyPost[0].setImageFile4(finalImageFile1);
+                                                    itemsData.add(propertyPost[0]);
+                                                    if (mAdapter != null)
+                                                        mAdapter.notifyDataSetChanged();
+                                                    loadingDialog.dismiss();
+                                                });
+                                                if (finalImageFile1.delete())
+                                                    Log.d(TAG, "Temp file deleted");
+                                            });
+                                            if (finalImageFile3.delete())
+                                                Log.d(TAG, "Temp file deleted");
+                                        });
                                         if (imageFile2.delete()) Log.d(TAG, "Temp file deleted");
-
-                                        propertyImageRef.set(storageRef
-                                                .child("images")
-                                                .child(userId)
-                                                .child("property" + num)
-                                                .child("image3"));
-
-                                        File finalImageFile1 = imageFile3;
-                                        propertyImageRef.get().getFile(imageFile3).addOnCompleteListener(task2 ->
-                                                propertyPost[0].setImageFile3(finalImageFile1));
-                                        if (imageFile3.delete()) Log.d(TAG, "Temp file deleted");
-
-                                        propertyImageRef.set(storageRef
-                                                .child("images")
-                                                .child(userId)
-                                                .child("property" + num)
-                                                .child("image4"));
-
-                                        File finalImageFile2 = imageFile4;
-                                        propertyImageRef.get().getFile(imageFile4).addOnCompleteListener(task2 ->
-                                                propertyPost[0].setImageFile4(finalImageFile2));
-                                        if (imageFile4.delete()) Log.d(TAG, "Temp file deleted");
-
-                                        propertyImageRef.set(storageRef
-                                                .child("images")
-                                                .child(userId)
-                                                .child("property" + num)
-                                                .child("image5"));
-
-                                        File finalImageFile3 = imageFile5;
-                                        propertyImageRef.get().getFile(imageFile5).addOnCompleteListener(task2 ->
-                                                propertyPost[0].setImageFile5(finalImageFile3));
-                                        if (imageFile5.delete()) Log.d(TAG, "Temp file deleted");
-
-                                        itemsData.add(propertyPost[0]);
-                                        if (mAdapter != null) mAdapter.notifyDataSetChanged();
-                                        loadingDialog.dismiss();
                                     });
                                     if (imageFile1.delete()) Log.d(TAG, "Temp file deleted");
 
