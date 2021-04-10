@@ -1,6 +1,5 @@
 package com.example.occupines.fragments;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SecondFragment extends Fragment {
 
@@ -119,18 +119,21 @@ public class SecondFragment extends Fragment {
                     DocumentSnapshot document = Objects.requireNonNull(task.getResult());
                     if (document.exists()) {
                         String documentId = document.getId();
-                        StorageReference propertyImageRef = storageRef
+                        String userId = documentId.substring(0, documentId.length() - 2);
+                        int num = Integer.parseInt(documentId.substring(documentId.length() - 1));
+
+                        AtomicReference<StorageReference> propertyImageRef = new AtomicReference<>(storageRef
                                 .child("images")
-                                .child(documentId.substring(0, documentId.length() - 2))
-                                .child("property" + Integer.parseInt(documentId.substring(documentId.length() - 1)))  //  Get last number of doc id
-                                .child("image1");
+                                .child(userId)
+                                .child("property" + num)
+                                .child("image1"));
 
                         try {
-                            File localFile = File.createTempFile(documentId, "jpg");
-                            Log.d(TAG, Uri.fromFile(localFile).toString());
-                            propertyImageRef.getFile(localFile).addOnCompleteListener(task1 -> {
-                                Property propertyPost = new Property(
-                                        localFile,
+                            final Property[] propertyPost = new Property[1];
+                            File imageFile1 = File.createTempFile(userId, "jpg");
+                            propertyImageRef.get().getFile(imageFile1).addOnCompleteListener(task1 -> {
+                                propertyPost[0] = new Property(
+                                        imageFile1,
                                         document.getString("type"),
                                         Objects.requireNonNull(document.getDouble("price")),
                                         document.getString("location"),
@@ -138,22 +141,70 @@ public class SecondFragment extends Fragment {
                                         document.getString("info"),
                                         documentId);
 
-                                properties.add(propertyPost);
-                                if (mAdapter != null) mAdapter.notifyDataSetChanged();
+                                propertyImageRef.set(storageRef
+                                        .child("images")
+                                        .child(userId)
+                                        .child("property" + num)
+                                        .child("image2"));
+
+                                File imageFile2 = null;
+                                File imageFile3 = null;
+                                File imageFile4 = null;
+                                try {
+                                    imageFile2 = File.createTempFile(userId, "jpg");
+                                    imageFile3 = File.createTempFile(userId, "jpg");
+                                    imageFile4 = File.createTempFile(userId, "jpg");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+                                File finalImageFile = imageFile2;
+                                File finalImageFile3 = imageFile3;
+                                File finalImageFile1 = imageFile4;
+                                propertyImageRef.get().getFile(imageFile2).addOnCompleteListener(task2 -> {
+                                    propertyPost[0].setImageFile2(finalImageFile);
+
+                                    propertyImageRef.set(storageRef
+                                            .child("images")
+                                            .child(userId)
+                                            .child("property" + num)
+                                            .child("image3"));
+
+                                    propertyImageRef.get().getFile(finalImageFile3).addOnCompleteListener(task3 -> {
+                                        propertyPost[0].setImageFile3(finalImageFile3);
+
+                                        propertyImageRef.set(storageRef
+                                                .child("images")
+                                                .child(userId)
+                                                .child("property" + num)
+                                                .child("image4"));
+
+                                        propertyImageRef.get().getFile(finalImageFile1).addOnCompleteListener(task4 -> {
+                                            propertyPost[0].setImageFile4(finalImageFile1);
+
+                                            loadingDialog.dismiss();
+                                            properties.add(propertyPost[0]);
+                                            if (mAdapter != null) mAdapter.notifyDataSetChanged();
+                                        });
+
+                                        if (finalImageFile1.delete())
+                                            Log.d(TAG, "Temp file deleted");
+                                    });
+                                    if (finalImageFile3.delete()) Log.d(TAG, "Temp file deleted");
+                                });
+                                if (imageFile2.delete()) Log.d(TAG, "Temp file deleted");
                             });
-                            if (localFile.delete()) {
-                                Log.d(TAG, "Temp file deleted");
-                            }
+                            if (imageFile1.delete()) Log.d(TAG, "Temp file deleted");
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     } else {
                         Log.d(TAG, "No such document");
                     }
-                    loadingDialog.dismiss();
-
                 } else {
                     Log.w(TAG, "Error getting documents.", task.getException());
+                    loadingDialog.dismiss();
                 }
             });
         }
