@@ -133,6 +133,18 @@ public class ListFragment extends Fragment {
                                         document.getString("info"),
                                         documentId);
 
+                                if (!FirstFragment.location.isEmpty()) {
+                                    if (propertyPost[0].getLocation().toLowerCase().contains(FirstFragment.location.toLowerCase())) {
+                                        itemsData.add(propertyPost[0]);
+                                    }
+                                } else {
+                                    itemsData.add(propertyPost[0]);
+                                }
+                                recyclerView.setVisibility(View.VISIBLE);
+                                noPosts.setVisibility(View.GONE);
+                                loadingDialog.dismiss();
+                                if (mAdapter != null) mAdapter.notifyDataSetChanged();
+
                                 propertyImageRef.set(storageRef
                                         .child("images")
                                         .child(userId)
@@ -156,6 +168,18 @@ public class ListFragment extends Fragment {
                                 propertyImageRef.get().getFile(imageFile2).addOnCompleteListener(task2 -> {
                                     propertyPost[0].setImageFile2(finalImageFile);
 
+                                    if (!FirstFragment.location.isEmpty()) {
+                                        if (propertyPost[0].getLocation().toLowerCase().contains(FirstFragment.location.toLowerCase())) {
+                                            itemsData.add(propertyPost[0]);
+                                        }
+                                    } else {
+                                        itemsData.add(propertyPost[0]);
+                                    }
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    noPosts.setVisibility(View.GONE);
+                                    loadingDialog.dismiss();
+                                    if (mAdapter != null) mAdapter.notifyDataSetChanged();
+
                                     propertyImageRef.set(storageRef
                                             .child("images")
                                             .child(userId)
@@ -164,6 +188,18 @@ public class ListFragment extends Fragment {
 
                                     propertyImageRef.get().getFile(finalImageFile3).addOnCompleteListener(task3 -> {
                                         propertyPost[0].setImageFile3(finalImageFile3);
+
+                                        if (!FirstFragment.location.isEmpty()) {
+                                            if (propertyPost[0].getLocation().toLowerCase().contains(FirstFragment.location.toLowerCase())) {
+                                                itemsData.add(propertyPost[0]);
+                                            }
+                                        } else {
+                                            itemsData.add(propertyPost[0]);
+                                        }
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                        noPosts.setVisibility(View.GONE);
+                                        loadingDialog.dismiss();
+                                        if (mAdapter != null) mAdapter.notifyDataSetChanged();
 
                                         propertyImageRef.set(storageRef
                                                 .child("images")
